@@ -1,0 +1,20 @@
+{
+	"name": "better-sqlite",
+	"version": "0.0.1",
+	"description": "Better SQLite bindings for Node.js.",
+	"license": "MIT",
+	"main": "./lib",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/drjokepu/better-sqlite.git"
+	},
+	"dependencies": {
+	},
+	"devDependencies": {
+		"grunt": "*",
+		"grunt-contrib-jshint": "*",
+		"grunt-jsbeautifier": "*",
+		"mocha": "*",
+		"q": "*"
+	}
+}
