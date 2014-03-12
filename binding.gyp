@@ -3,14 +3,14 @@
     	{
     		"target_name": "sqlite",
 			"sources": [
-				"addon.cc",
-				"bindings.c",
-				"db.c",
-				"db_wrapper.cc"
+				"src/addon.cc",
+				"src/bindings.c",
+				"src/db.c",
+				"src/db_wrapper.cc"
 			],
 			"conditions": [
 				[
-					"OS==\"mac\"",
+					"OS==\"mac\" and clang==1",
 					{
 						"xcode_settings": {
 							"CLANG_CXX_LANGUAGE_STANDARD": "c++11",
