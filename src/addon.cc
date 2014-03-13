@@ -5,8 +5,6 @@
 #include "db.h"
 #include "db_wrapper.h"
 
-#include <cstdio>
-
 using namespace v8;
 
 static void OpenCallback(open_baton_t *baton) {
@@ -57,7 +55,7 @@ static Handle<Value> Open(const Arguments& args) {
 	baton->c_callback = OpenCallback;
 	baton->js_callback = *Persistent<Function>::New(Handle<Function>::Cast(args[2]));
 	baton->wrapper = wrapper;
-	sqlite3_open_async(baton);
+	open_async(baton);
 	
 	return scope.Close(Undefined());
 }
@@ -98,7 +96,7 @@ static Handle<Value> Close(const Arguments& args) {
 	baton->db = wrapper->db;
 	baton->c_callback = CloseCallback;
 	baton->js_callback = *Persistent<Function>::New(Handle<Function>::Cast(args[1]));
-	sqlite3_close_async(baton);
+	close_async(baton);
 	
 	return scope.Close(Undefined());
 }
