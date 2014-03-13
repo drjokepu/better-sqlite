@@ -6,7 +6,8 @@
 				"src/addon.cc",
 				"src/bindings.c",
 				"src/db.c",
-				"src/db_wrapper.cc"
+				"src/db_wrapper.cc",
+                "src/sqlite3/sqlite3.c"
 			],
 			"conditions": [
 				[

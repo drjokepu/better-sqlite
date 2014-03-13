@@ -1,8 +1,8 @@
 #ifndef __BS_DB_H__
 #define __BS_DB_H__
 
-#include <sqlite3.h>
 #include <uv.h>
+#include "sqlite3/sqlite3.h"
 
 #ifdef __cplusplus
 extern "C"
