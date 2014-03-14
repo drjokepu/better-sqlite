@@ -18,7 +18,7 @@ describe('db', function() {
 			.fin(makeCleanup(filename))
 			.done();
 	});
-	
+
 	it('close', function(done) {
 		var filename = './db_close_test.db';
 		var db = null;
