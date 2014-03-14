@@ -1,8 +1,5 @@
-#include <sched.h>
 #include <stdlib.h>
 #include "db.h"
-
-#include <stdio.h>
 
 db_t *db_new(void) {
 	db_t *db = malloc(sizeof(db_t));

@@ -1,22 +1,22 @@
-#include "db_wrapper.h"
+#include "statement_wrapper.h"
 
 using namespace v8;
 
-static const char *const className = "DbWrapper";
+static const char *const className = "StatementWrapper";
 
-Persistent<Function> DbWrapper::constructor;
+Persistent<Function> StatementWrapper::constructor;
 
-DbWrapper::DbWrapper() : db(NULL) {
+StatementWrapper::StatementWrapper() : statement(NULL) {
 }
 
-DbWrapper::~DbWrapper() {
-	if (db != NULL) {
-		db_free(db);
-		db = NULL;
+StatementWrapper::~StatementWrapper() {
+	if (statement != NULL) {
+		statement_free(statement);
+		statement = NULL;
 	}
 }
 
-void DbWrapper::Init(Handle<Object> exports) {
+void StatementWrapper::Init(Handle<Object> exports) {
 	// Prepare constructor template
 	auto tpl = FunctionTemplate::New(New);
 	tpl->SetClassName(String::NewSymbol(className));
@@ -27,11 +27,11 @@ void DbWrapper::Init(Handle<Object> exports) {
 	exports->Set(String::NewSymbol(className), constructor);
 }
 
-Handle<Value> DbWrapper::New(const Arguments& args) {
+Handle<Value> StatementWrapper::New(const Arguments& args) {
 	HandleScope scope;
 
 	if (args.IsConstructCall()) {
-		DbWrapper *obj = new DbWrapper();
+		StatementWrapper *obj = new StatementWrapper();
 		obj->Wrap(args.This());
 		return args.This();
 	} else {

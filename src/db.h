@@ -1,7 +1,6 @@
 #ifndef __BS_DB_H__
 #define __BS_DB_H__
 
-#include <uv.h>
 #include "sqlite3/sqlite3.h"
 
 #ifdef __cplusplus
@@ -9,7 +8,7 @@ extern "C"
 {
 #endif
 
-typedef struct {
+typedef struct db_t {
 	sqlite3 *sqlite_db;
 } db_t;
 

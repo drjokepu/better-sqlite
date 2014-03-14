@@ -4,7 +4,7 @@
 #include <node.h>
 #include "db.h"
 
-class DbWrapper : public node::ObjectWrap {
+class DbWrapper final : public node::ObjectWrap {
 public:
 	db_t *db;
 	static void Init(v8::Handle<v8::Object> exports);

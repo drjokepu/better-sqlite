@@ -7,6 +7,8 @@
 				"src/bindings.c",
 				"src/db.c",
 				"src/db_wrapper.cc",
+                "src/statement.c",
+                "src/statement_wrapper.cc",
                 "src/sqlite3/sqlite3.c"
 			],
 			"conditions": [
