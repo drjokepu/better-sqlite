@@ -108,6 +108,27 @@ describe('statement', function() {
 				.fin(makeCleanup(filename))
 				.done();
 		});
+
+		it('int64', function(done) {
+			var filename = './stmt_prepare_bind_int32_test.db',
+				db = null,
+				stmt = null;
+
+			Q
+				.ninvoke(sqlite, 'open', filename)
+				.then(function(_db) {
+					db = _db;
+					return Q.ninvoke(db, 'prepare', 'select ?');
+				})
+				.then(function(_stmt) {
+					stmt = _stmt;
+					stmt.bind(68719476736);
+					return Q.ninvoke(db, 'close');
+				})
+				.then(done)
+				.fin(makeCleanup(filename))
+				.done();
+		});
 	});
 });
 

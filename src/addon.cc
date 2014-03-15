@@ -31,6 +31,15 @@ static Handle<Value> ErrMsg(const Arguments& args) {
 static int BindValue(statement_t *stmt, const int index, Handle<Value> value) {
 	if (value->IsInt32()) {
 		return bind_int_sync(stmt, index, value->Int32Value());
+	} else if (value->IsNumber()) {
+		auto double_value = value->NumberValue();
+		auto int64_value = value->IntegerValue();
+		
+		if ((double)int64_value == double_value) {
+			return bind_int64_sync(stmt, index, int64_value);
+		} else {
+			return BS_UNKNOWN_TYPE;
+		}
 	} else {
 		return BS_UNKNOWN_TYPE;
 	}
