@@ -180,15 +180,26 @@ static Handle<Value> Prepare(const Arguments& args) {
 	return scope.Close(Undefined());
 }
 
-static void Init(Handle<Object> exports) {
+static inline void AddFunction(Handle<Object> exports, const char *name, Handle<Value> (function)(const Arguments&)) {
+	exports->Set(String::NewSymbol(name), FunctionTemplate::New(function)->GetFunction());
+}
+
+static void ExportTypes(Handle<Object> exports) {
 	DbWrapper::Init(exports);
 	StatementWrapper::Init(exports);
-	
-	exports->Set(String::NewSymbol("close"), FunctionTemplate::New(Close)->GetFunction());
-	exports->Set(String::NewSymbol("errMsg"), FunctionTemplate::New(ErrMsg)->GetFunction());
-	exports->Set(String::NewSymbol("open"), FunctionTemplate::New(Open)->GetFunction());
-	exports->Set(String::NewSymbol("prepare"), FunctionTemplate::New(Prepare)->GetFunction());
-	exports->Set(String::NewSymbol("version"), FunctionTemplate::New(Version)->GetFunction());
+}
+
+static void ExportFunctions(Handle<Object> exports) {
+	AddFunction(exports, "close", Close);
+	AddFunction(exports, "errMsg", ErrMsg);
+	AddFunction(exports, "open", Open);
+	AddFunction(exports, "prepare", Prepare);
+	AddFunction(exports, "version", Version);
+}
+
+static void Init(Handle<Object> exports) {
+	ExportTypes(exports);
+	ExportFunctions(exports);
 }
 
 NODE_MODULE(sqlite, Init)
