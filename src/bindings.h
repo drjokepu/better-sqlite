@@ -45,6 +45,7 @@ name##_baton_t *name##_baton_new(void); \
 void name##_baton_free(name##_baton_t *baton); \
 void name##_async(name##_baton_t *baton);
 
+int bind_int_sync(statement_t *stmt, int index, int value);
 const char *errmsg_sync(db_t *db);
 const char *libversion_sync(void);
 

@@ -1,6 +1,10 @@
 #include <stdlib.h>
 #include "bindings.h"
 
+int bind_int_sync(statement_t *stmt, int index, int value) {
+	return sqlite3_bind_int(stmt->sqlite_statement, index, value);
+}
+
 const char *errmsg_sync(db_t *db) {
 	return sqlite3_errmsg(db->sqlite_db);
 }

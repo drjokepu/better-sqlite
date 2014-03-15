@@ -7,6 +7,8 @@
 #include "statement.h"
 #include "statement_wrapper.h"
 
+#define BS_UNKNOWN_TYPE (-9000)
+
 using namespace v8;
 
 static Handle<Value> ErrMsg(const Arguments& args) {
@@ -25,6 +27,44 @@ static Handle<Value> ErrMsg(const Arguments& args) {
 	
 	return scope.Close(String::New(errmsg_sync(db_wrapper->db)));
 }
+
+static int BindValue(statement_t *stmt, const int index, Handle<Value> value) {
+	if (value->IsInt32()) {
+		return bind_int_sync(stmt, index, value->Int32Value());
+	} else {
+		return BS_UNKNOWN_TYPE;
+	}
+}
+
+static Handle<Value> Bind(const Arguments& args) {
+	HandleScope scope;
+	if (args.Length() < 3) {
+		ThrowException(Exception::TypeError(String::New("Expected at least three arguments.")));
+	    return scope.Close(Undefined());
+	}
+	
+	if (!args[0]->IsObject()) {
+	    ThrowException(Exception::TypeError(String::New("First argument must be an object.")));
+	    return scope.Close(Undefined());
+	}
+	
+	if (!args[2]->IsInt32()) {
+	    ThrowException(Exception::TypeError(String::New("Third argument must be an integer.")));
+	    return scope.Close(Undefined());
+	}
+	
+	StatementWrapper *statement_wrapper = node::ObjectWrap::Unwrap<StatementWrapper>(Handle<Object>::Cast(args[0]));
+	const int index = args[2]->Int32Value();
+	const int binding_result = BindValue(statement_wrapper->statement, index, args[1]);
+	
+	if (binding_result != BS_UNKNOWN_TYPE) {
+		return scope.Close(Integer::New(binding_result));
+	} else {
+	    ThrowException(Exception::TypeError(String::New("Unsupported object type.")));
+	    return scope.Close(Undefined());
+	}
+}
+
 
 static Handle<Value> Version(const Arguments& args) {
 	HandleScope scope;
@@ -190,6 +230,7 @@ static void ExportTypes(Handle<Object> exports) {
 }
 
 static void ExportFunctions(Handle<Object> exports) {
+	AddFunction(exports, "bind", Bind);
 	AddFunction(exports, "close", Close);
 	AddFunction(exports, "errMsg", ErrMsg);
 	AddFunction(exports, "open", Open);
