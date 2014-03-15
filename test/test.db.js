@@ -45,6 +45,7 @@ describe('statement', function() {
 	describe('prepare', function() {
 		it('success', function(done) {
 			var filename = './stmt_prepare_test.db',
+				db = null,
 				stmt = null;
 			Q
 				.ninvoke(sqlite, 'open', filename)
@@ -66,6 +67,7 @@ describe('statement', function() {
 
 		it('error', function(done) {
 			var filename = './stmt_prepare_error_0_test.db',
+				db = null,
 				stmt = null;
 			Q
 				.ninvoke(sqlite, 'open', filename)
@@ -76,6 +78,7 @@ describe('statement', function() {
 				.then(function(_stmt) {
 					assert.fail('no error raised');
 				}, function(err) {
+					assert.strictEqual(db.errMsg(), 'no such table: no_test_table_1');
 					return Q.ninvoke(db, 'close');
 				})
 				.then(done)

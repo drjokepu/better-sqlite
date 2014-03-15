@@ -45,6 +45,7 @@ name##_baton_t *name##_baton_new(void); \
 void name##_baton_free(name##_baton_t *baton); \
 void name##_async(name##_baton_t *baton);
 
+const char *errmsg_sync(db_t *db);
 const char *libversion_sync(void);
 
 typedef struct open_baton_t {

@@ -1,6 +1,10 @@
 #include <stdlib.h>
 #include "bindings.h"
 
+const char *errmsg_sync(db_t *db) {
+	return sqlite3_errmsg(db->sqlite_db);
+}
+
 const char *libversion_sync(void) {
 	return sqlite3_libversion();
 }

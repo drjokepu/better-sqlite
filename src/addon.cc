@@ -9,6 +9,23 @@
 
 using namespace v8;
 
+static Handle<Value> ErrMsg(const Arguments& args) {
+	HandleScope scope;
+	if (args.Length() < 1) {
+		ThrowException(Exception::TypeError(String::New("Expected at least one arguments.")));
+	    return scope.Close(Undefined());
+	}
+	
+	if (!args[0]->IsObject()) {
+	    ThrowException(Exception::TypeError(String::New("First argument must be an object.")));
+	    return scope.Close(Undefined());
+	}
+	
+	DbWrapper *db_wrapper = node::ObjectWrap::Unwrap<DbWrapper>(Handle<Object>::Cast(args[0]));
+	
+	return scope.Close(String::New(errmsg_sync(db_wrapper->db)));
+}
+
 static Handle<Value> Version(const Arguments& args) {
 	HandleScope scope;
 	return scope.Close(String::New(libversion_sync()));
@@ -167,8 +184,9 @@ static void Init(Handle<Object> exports) {
 	DbWrapper::Init(exports);
 	StatementWrapper::Init(exports);
 	
-	exports->Set(String::NewSymbol("open"), FunctionTemplate::New(Open)->GetFunction());
 	exports->Set(String::NewSymbol("close"), FunctionTemplate::New(Close)->GetFunction());
+	exports->Set(String::NewSymbol("errMsg"), FunctionTemplate::New(ErrMsg)->GetFunction());
+	exports->Set(String::NewSymbol("open"), FunctionTemplate::New(Open)->GetFunction());
 	exports->Set(String::NewSymbol("prepare"), FunctionTemplate::New(Prepare)->GetFunction());
 	exports->Set(String::NewSymbol("version"), FunctionTemplate::New(Version)->GetFunction());
 }
