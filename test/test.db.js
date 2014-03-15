@@ -150,6 +150,27 @@ describe('statement', function() {
 				.fin(makeCleanup(filename))
 				.done();
 		});
+		
+		it('text', function(done) {
+			var filename = './stmt_prepare_bind_text_test.db',
+				db = null,
+				stmt = null;
+
+			Q
+				.ninvoke(sqlite, 'open', filename)
+				.then(function(_db) {
+					db = _db;
+					return Q.ninvoke(db, 'prepare', 'select ?');
+				})
+				.then(function(_stmt) {
+					stmt = _stmt;
+					stmt.bind('let it be');
+					return Q.ninvoke(db, 'close');
+				})
+				.then(done)
+				.fin(makeCleanup(filename))
+				.done();
+		});
 	});
 });
 

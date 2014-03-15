@@ -48,6 +48,7 @@ void name##_async(name##_baton_t *baton);
 int bind_int_sync(statement_t *stmt, int index, int value);
 int bind_int64_sync(statement_t *stmt, int index, long long value);
 int bind_double_sync(statement_t *stmt, int index, double value);
+int bind_text_sync(statement_t *stmt, int index, const char *value, int length);
 
 const char *errmsg_sync(db_t *db);
 const char *libversion_sync(void);

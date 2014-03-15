@@ -40,6 +40,9 @@ static int BindValue(statement_t *stmt, const int index, Handle<Value> value) {
 		} else {
 			return bind_double_sync(stmt, index, double_value);
 		}
+	} else if (value->IsString()) {
+		auto text = value->ToString();
+		return bind_text_sync(stmt, index, strdup(*v8::String::Utf8Value(text)), text->Utf8Length());
 	} else {
 		return BS_UNKNOWN_TYPE;
 	}
@@ -215,12 +218,13 @@ static Handle<Value> Prepare(const Arguments& args) {
 	
 	auto statement = statement_new();
 	auto baton = prepare_baton_new();
+	auto sql = args[2]->ToString();
 	
 	baton->req.data = baton;
 	baton->db = db_wrapper->db;
 	baton->statement = statement;
-	baton->sql = strdup(*v8::String::Utf8Value(args[2]->ToString()));
-	baton->sql_length = args[2]->ToString()->Length();
+	baton->sql = strdup(*v8::String::Utf8Value(sql));
+	baton->sql_length = sql->Utf8Length();
 	baton->c_callback = PrepareCallback;
 	baton->js_callback = *Persistent<Function>::New(Handle<Function>::Cast(args[3]));
 	statement_wrapper->statement = statement;
@@ -229,7 +233,7 @@ static Handle<Value> Prepare(const Arguments& args) {
 	return scope.Close(Undefined());
 }
 
-static inline void AddFunction(Handle<Object> exports, const char *name, Handle<Value> (function)(const Arguments&)) {
+static inline void AddFunction(Handle<Object> exports, const char *name, Handle<Value> (&function)(const Arguments&)) {
 	exports->Set(String::NewSymbol(name), FunctionTemplate::New(function)->GetFunction());
 }
 
