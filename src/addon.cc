@@ -38,7 +38,7 @@ static int BindValue(statement_t *stmt, const int index, Handle<Value> value) {
 		if ((double)int64_value == double_value) {
 			return bind_int64_sync(stmt, index, int64_value);
 		} else {
-			return BS_UNKNOWN_TYPE;
+			return bind_double_sync(stmt, index, double_value);
 		}
 	} else {
 		return BS_UNKNOWN_TYPE;

@@ -110,7 +110,7 @@ describe('statement', function() {
 		});
 
 		it('int64', function(done) {
-			var filename = './stmt_prepare_bind_int32_test.db',
+			var filename = './stmt_prepare_bind_int64_test.db',
 				db = null,
 				stmt = null;
 
@@ -123,6 +123,27 @@ describe('statement', function() {
 				.then(function(_stmt) {
 					stmt = _stmt;
 					stmt.bind(68719476736);
+					return Q.ninvoke(db, 'close');
+				})
+				.then(done)
+				.fin(makeCleanup(filename))
+				.done();
+		});
+
+		it('double', function(done) {
+			var filename = './stmt_prepare_bind_double_test.db',
+				db = null,
+				stmt = null;
+
+			Q
+				.ninvoke(sqlite, 'open', filename)
+				.then(function(_db) {
+					db = _db;
+					return Q.ninvoke(db, 'prepare', 'select ?');
+				})
+				.then(function(_stmt) {
+					stmt = _stmt;
+					stmt.bind(-140.25);
 					return Q.ninvoke(db, 'close');
 				})
 				.then(done)
