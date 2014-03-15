@@ -63,6 +63,25 @@ describe('statement', function() {
 				.fin(makeCleanup(filename))
 				.done();
 		});
+
+		it('error', function(done) {
+			var filename = './stmt_prepare_error_0_test.db',
+				stmt = null;
+			Q
+				.ninvoke(sqlite, 'open', filename)
+				.then(function(_db) {
+					db = _db;
+					return Q.ninvoke(db, 'prepare', 'select no_test_colimn_0 from no_test_table_1;');
+				})
+				.then(function(_stmt) {
+					assert.fail('no error raised');
+				}, function(err) {
+					return Q.ninvoke(db, 'close');
+				})
+				.then(done)
+				.fin(makeCleanup(filename))
+				.done();
+		});
 	});
 });
 
