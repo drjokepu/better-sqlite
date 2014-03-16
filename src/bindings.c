@@ -17,6 +17,10 @@ int bind_text_sync(statement_t *stmt, int index, const char *value, int length) 
 	return sqlite3_bind_text(stmt->sqlite_statement, index, value, length, free);
 }
 
+int bind_null_sync(statement_t *stmt, int index) {
+	return sqlite3_bind_null(stmt->sqlite_statement, index);
+}
+
 const char *errmsg_sync(db_t *db) {
 	return sqlite3_errmsg(db->sqlite_db);
 }

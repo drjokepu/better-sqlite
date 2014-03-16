@@ -43,6 +43,8 @@ static int BindValue(statement_t *stmt, const int index, Handle<Value> value) {
 	} else if (value->IsString()) {
 		auto text = value->ToString();
 		return bind_text_sync(stmt, index, strdup(*v8::String::Utf8Value(text)), text->Utf8Length());
+	} else if (value->IsNull()) {
+		return bind_null_sync(stmt, index);
 	} else {
 		return BS_UNKNOWN_TYPE;
 	}

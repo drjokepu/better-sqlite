@@ -116,6 +116,7 @@ describe('statement', function() {
 		it('int64', makeBindTest(68719476736));
 		it('double', makeBindTest(-140.25));
 		it('text', makeBindTest('let it be'));
+		it('null', makeBindTest(null));
 	});
 });
 
