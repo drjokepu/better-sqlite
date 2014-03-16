@@ -88,89 +88,34 @@ describe('statement', function() {
 	});
 
 	describe('bind', function() {
-		it('int32', function(done) {
-			var filename = './stmt_prepare_bind_int32_test.db',
-				db = null,
-				stmt = null;
 
-			Q
-				.ninvoke(sqlite, 'open', filename)
-				.then(function(_db) {
-					db = _db;
-					return Q.ninvoke(db, 'prepare', 'select ?');
-				})
-				.then(function(_stmt) {
-					stmt = _stmt;
-					stmt.bind(512);
-					return Q.ninvoke(db, 'close');
-				})
-				.then(done)
-				.fin(makeCleanup(filename))
-				.done();
-		});
+		function makeBindTest(value) {
+			return function(done) {
+				var filename = './stmt_prepare_bind_test.db',
+					db = null,
+					stmt = null;
 
-		it('int64', function(done) {
-			var filename = './stmt_prepare_bind_int64_test.db',
-				db = null,
-				stmt = null;
+				Q
+					.ninvoke(sqlite, 'open', filename)
+					.then(function(_db) {
+						db = _db;
+						return Q.ninvoke(db, 'prepare', 'select ?');
+					})
+					.then(function(_stmt) {
+						stmt = _stmt;
+						stmt.bind(value);
+						return Q.ninvoke(db, 'close');
+					})
+					.then(done)
+					.fin(makeCleanup(filename))
+					.done();
+			};
+		}
 
-			Q
-				.ninvoke(sqlite, 'open', filename)
-				.then(function(_db) {
-					db = _db;
-					return Q.ninvoke(db, 'prepare', 'select ?');
-				})
-				.then(function(_stmt) {
-					stmt = _stmt;
-					stmt.bind(68719476736);
-					return Q.ninvoke(db, 'close');
-				})
-				.then(done)
-				.fin(makeCleanup(filename))
-				.done();
-		});
-
-		it('double', function(done) {
-			var filename = './stmt_prepare_bind_double_test.db',
-				db = null,
-				stmt = null;
-
-			Q
-				.ninvoke(sqlite, 'open', filename)
-				.then(function(_db) {
-					db = _db;
-					return Q.ninvoke(db, 'prepare', 'select ?');
-				})
-				.then(function(_stmt) {
-					stmt = _stmt;
-					stmt.bind(-140.25);
-					return Q.ninvoke(db, 'close');
-				})
-				.then(done)
-				.fin(makeCleanup(filename))
-				.done();
-		});
-		
-		it('text', function(done) {
-			var filename = './stmt_prepare_bind_text_test.db',
-				db = null,
-				stmt = null;
-
-			Q
-				.ninvoke(sqlite, 'open', filename)
-				.then(function(_db) {
-					db = _db;
-					return Q.ninvoke(db, 'prepare', 'select ?');
-				})
-				.then(function(_stmt) {
-					stmt = _stmt;
-					stmt.bind('let it be');
-					return Q.ninvoke(db, 'close');
-				})
-				.then(done)
-				.fin(makeCleanup(filename))
-				.done();
-		});
+		it('int32', makeBindTest(512));
+		it('int64', makeBindTest(68719476736));
+		it('double', makeBindTest(-140.25));
+		it('text', makeBindTest('let it be'));
 	});
 });
 
