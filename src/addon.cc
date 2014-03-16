@@ -32,8 +32,8 @@ static int BindValue(statement_t *stmt, const int index, Handle<Value> value) {
 	if (value->IsInt32()) {
 		return bind_int_sync(stmt, index, value->Int32Value());
 	} else if (value->IsNumber()) {
-		auto double_value = value->NumberValue();
-		auto int64_value = value->IntegerValue();
+		const auto double_value = value->NumberValue();
+		const auto int64_value = value->IntegerValue();
 		
 		if ((double)int64_value == double_value) {
 			return bind_int64_sync(stmt, index, int64_value);
@@ -83,6 +83,23 @@ static Handle<Value> Bind(const Arguments& args) {
 static Handle<Value> Version(const Arguments& args) {
 	HandleScope scope;
 	return scope.Close(String::New(libversion_sync()));
+}
+
+static Handle<Value> Finalize(const Arguments& args) {
+	HandleScope scope;
+	if (args.Length() < 1) {
+		ThrowException(Exception::TypeError(String::New("Expected at least one arguments.")));
+	    return scope.Close(Undefined());
+	}
+	
+	if (!args[0]->IsObject()) {
+	    ThrowException(Exception::TypeError(String::New("First argument must be an object.")));
+	    return scope.Close(Undefined());
+	}
+	
+	StatementWrapper *statement_wrapper = node::ObjectWrap::Unwrap<StatementWrapper>(Handle<Object>::Cast(args[0]));
+	const auto error_code = finalize_sync(statement_wrapper->statement);
+	return scope.Close(Integer::New(error_code));
 }
 
 static void OpenCallback(open_baton_t *baton) {
@@ -248,6 +265,7 @@ static void ExportFunctions(Handle<Object> exports) {
 	AddFunction(exports, "bind", Bind);
 	AddFunction(exports, "close", Close);
 	AddFunction(exports, "errMsg", ErrMsg);
+	AddFunction(exports, "finalize", Finalize);
 	AddFunction(exports, "open", Open);
 	AddFunction(exports, "prepare", Prepare);
 	AddFunction(exports, "version", Version);

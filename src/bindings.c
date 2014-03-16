@@ -28,6 +28,9 @@ const char *errmsg_sync(db_t *db) {
 const char *libversion_sync(void) {
 	return sqlite3_libversion();
 }
+int finalize_sync(statement_t *stmt) {
+	return sqlite3_finalize(stmt->sqlite_statement);
+}
 
 //
 // open

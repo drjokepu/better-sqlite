@@ -58,6 +58,7 @@ describe('statement', function() {
 					assert.notStrictEqual(stmt, null);
 					assert.notStrictEqual(stmt, undefined);
 					assert.strictEqual(stmt.constructor.name, 'Statement');
+					stmt.finalize();
 					return Q.ninvoke(db, 'close');
 				})
 				.then(done)
@@ -77,6 +78,7 @@ describe('statement', function() {
 				})
 				.then(function(_stmt) {
 					assert.fail('no error raised');
+					stmt.finalize();
 				}, function(err) {
 					assert.strictEqual(db.errMsg(), 'no such table: no_test_table_1');
 					return Q.ninvoke(db, 'close');
@@ -104,6 +106,7 @@ describe('statement', function() {
 					.then(function(_stmt) {
 						stmt = _stmt;
 						stmt.bind(value);
+						stmt.finalize();
 						return Q.ninvoke(db, 'close');
 					})
 					.then(done)

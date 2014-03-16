@@ -53,6 +53,7 @@ int bind_null_sync(statement_t *stmt, int index);
 
 const char *errmsg_sync(db_t *db);
 const char *libversion_sync(void);
+int finalize_sync(statement_t *stmt);
 
 typedef struct open_baton_t {
 	uv_work_t req;
