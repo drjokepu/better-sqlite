@@ -1,7 +1,7 @@
 var assert = require('assert');
 var fs = require('fs');
 var Q = require('q');
-var sqlite = require('..');
+var sqlite = require('..').lowLevel;
 
 describe('db', function() {
 	it('open', function(done) {
