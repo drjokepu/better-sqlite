@@ -83,3 +83,16 @@ static void prepare_baton_free_members(prepare_baton_t *restrict baton) {
 
 SQLITE_BINDING(prepare);
 
+//
+// step
+// ----
+
+static void step_baton_do(step_baton_t *restrict baton) {
+	baton->result = sqlite3_step(baton->statement->sqlite_statement);
+}
+
+static void step_baton_free_members(step_baton_t *restrict baton) {
+}
+
+SQLITE_BINDING(step);
+

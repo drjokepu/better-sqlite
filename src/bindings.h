@@ -92,6 +92,17 @@ typedef struct prepare_baton_t {
 
 SQLITE_BINDING_HEADER(prepare)
 
+typedef struct step_baton_t {
+	uv_work_t req;
+	statement_t *statement;
+	uv_async_t async;
+	void (*c_callback)(struct step_baton_t *);
+	void *js_callback;
+	int result;
+} step_baton_t;
+
+SQLITE_BINDING_HEADER(step)
+
 #ifdef __cplusplus
 }
 #endif

@@ -90,7 +90,6 @@ describe('statement', function() {
 	});
 
 	describe('bind', function() {
-
 		function makeBindTest(value) {
 			return function(done) {
 				var filename = './stmt_prepare_bind_test.db',
@@ -121,7 +120,35 @@ describe('statement', function() {
 		it('text', makeBindTest('let it be'));
 		it('null', makeBindTest(null));
 	});
+
+	describe('step', function() {
+		it('create table', function(done) {
+			var filename = './stmt_step_create_table_test.db',
+				db = null,
+				stmt = null;
+			Q
+				.ninvoke(sqlite, 'open', filename)
+				.then(function(_db) {
+					db = _db;
+					return Q.ninvoke(db, 'prepare', 'create table test_table_0 (id integer not null, name text not null);');
+				})
+				.then(function(_stmt) {
+					console.log('done: prepare');
+					stmt = _stmt;
+					return Q.ninvoke(stmt, 'step');
+				})
+				.then(function() {
+					console.log('done: step');
+					stmt.finalize();
+					return Q.ninvoke(db, 'close');
+				})
+				.then(done)
+				.fin(makeCleanup(filename))
+				.done();
+		});
+	});
 });
+
 
 function makeCleanup(filename) {
 	return function cleanup() {

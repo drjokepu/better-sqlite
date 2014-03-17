@@ -252,6 +252,47 @@ static Handle<Value> Prepare(const Arguments& args) {
 	return scope.Close(Undefined());
 }
 
+static void StepCallback(step_baton_t *baton) {	
+	Local<Value> args[] = {
+		Local<Value>::New(Integer::New(baton->result))
+	};
+	
+	Persistent<Function> callback = static_cast<Function*>(baton->js_callback);
+	callback->Call(Context::GetCurrent()->Global(), 1, args);
+	callback.Dispose();
+	step_baton_free(baton);
+}
+
+static Handle<Value> Step(const Arguments& args) {
+	HandleScope scope;
+	
+	if (args.Length() < 2) {
+		ThrowException(Exception::TypeError(String::New("Expected at least one argument.")));
+	    return scope.Close(Undefined());
+	}
+	
+	if (!args[0]->IsObject()) {
+	    ThrowException(Exception::TypeError(String::New("First argument must be an object.")));
+	    return scope.Close(Undefined());
+	}
+    
+	if (!args[1]->IsFunction()) {
+	    ThrowException(Exception::TypeError(String::New("Second argument must be a function.")));
+	    return scope.Close(Undefined());
+	}
+	
+	StatementWrapper *statement_wrapper = node::ObjectWrap::Unwrap<StatementWrapper>(Handle<Object>::Cast(args[0]));
+    auto baton = step_baton_new();
+    
+	baton->req.data = baton;
+	baton->statement = statement_wrapper->statement;
+	baton->c_callback = StepCallback;
+	baton->js_callback = *Persistent<Function>::New(Handle<Function>::Cast(args[1]));
+	step_async(baton);
+	
+	return scope.Close(Undefined());
+}
+
 static inline void AddFunction(Handle<Object> exports, const char *name, Handle<Value> (&function)(const Arguments&)) {
 	exports->Set(String::NewSymbol(name), FunctionTemplate::New(function)->GetFunction());
 }
@@ -268,6 +309,7 @@ static void ExportFunctions(Handle<Object> exports) {
 	AddFunction(exports, "finalize", Finalize);
 	AddFunction(exports, "open", Open);
 	AddFunction(exports, "prepare", Prepare);
+    AddFunction(exports, "step", Step);
 	AddFunction(exports, "version", Version);
 }
 
