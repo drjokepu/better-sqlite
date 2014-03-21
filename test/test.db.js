@@ -14,7 +14,7 @@ describe('db', function() {
 				assert.strictEqual(db.constructor.name, 'Db');
 			})
 			.then(done)
-			.fin(makeCleanup(filename))
+			.finally(makeCleanup(filename))
 			.done();
 	});
 
@@ -31,7 +31,7 @@ describe('db', function() {
 				return Q.ninvoke(db, 'close');
 			})
 			.then(done)
-			.fin(makeCleanup(filename))
+			.finally(makeCleanup(filename))
 			.done();
 	});
 
@@ -62,7 +62,7 @@ describe('statement', function() {
 					return Q.ninvoke(db, 'close');
 				})
 				.then(done)
-				.fin(makeCleanup(filename))
+				.finally(makeCleanup(filename))
 				.done();
 		});
 
@@ -84,7 +84,7 @@ describe('statement', function() {
 					return Q.ninvoke(db, 'close');
 				})
 				.then(done)
-				.fin(makeCleanup(filename))
+				.finally(makeCleanup(filename))
 				.done();
 		});
 	});
@@ -109,7 +109,7 @@ describe('statement', function() {
 						return Q.ninvoke(db, 'close');
 					})
 					.then(done)
-					.fin(makeCleanup(filename))
+					.finally(makeCleanup(filename))
 					.done();
 			};
 		}
@@ -143,7 +143,7 @@ describe('statement', function() {
 					return Q.ninvoke(db, 'close');
 				})
 				.then(done)
-				.fin(makeCleanup(filename))
+				.finally(makeCleanup(filename))
 				.done();
 		});
 	});
