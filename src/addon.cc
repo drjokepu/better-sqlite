@@ -79,6 +79,28 @@ static Handle<Value> Bind(const Arguments& args) {
 	}
 }
 
+static Handle<Value> ColumnType(const Arguments& args) {
+	HandleScope scope;
+	if (args.Length() < 2) {
+		ThrowException(Exception::TypeError(String::New("Expected at least two arguments.")));
+	    return scope.Close(Undefined());
+	}
+	
+	if (!args[0]->IsObject()) {
+	    ThrowException(Exception::TypeError(String::New("First argument must be an object.")));
+	    return scope.Close(Undefined());
+	}
+	
+	if (!args[1]->IsInt32()) {
+	    ThrowException(Exception::TypeError(String::New("Second argument must be an integer.")));
+	    return scope.Close(Undefined());
+	}
+	
+	StatementWrapper *statement_wrapper = node::ObjectWrap::Unwrap<StatementWrapper>(Handle<Object>::Cast(args[0]));
+	const int column_index = args[1]->Int32Value();
+    const int columnDatatypeCode = column_type_sync(statement_wrapper->statement, column_index);
+    return scope.Close(Integer::New(columnDatatypeCode));
+}
 
 static Handle<Value> Version(const Arguments& args) {
 	HandleScope scope;
@@ -305,6 +327,7 @@ static void ExportTypes(Handle<Object> exports) {
 static void ExportFunctions(Handle<Object> exports) {
 	AddFunction(exports, "bind", Bind);
 	AddFunction(exports, "close", Close);
+    AddFunction(exports, "columnType", ColumnType);
 	AddFunction(exports, "errMsg", ErrMsg);
 	AddFunction(exports, "finalize", Finalize);
 	AddFunction(exports, "open", Open);

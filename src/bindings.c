@@ -21,6 +21,10 @@ int bind_null_sync(statement_t *stmt, int index) {
 	return sqlite3_bind_null(stmt->sqlite_statement, index);
 }
 
+int column_type_sync(statement_t *stmt, int column_index) {
+    return sqlite3_column_type(stmt->sqlite_statement, column_index);
+};
+
 const char *errmsg_sync(db_t *db) {
 	return sqlite3_errmsg(db->sqlite_db);
 }
