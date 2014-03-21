@@ -96,7 +96,8 @@ describe('statement', function() {
 	describe('bind', function() {
 		function makeBindTest(value) {
 			return function(done) {
-				var filename = './stmt_prepare_bind_test.db',
+				var code = Math.floor(Math.random() * 10000000);
+				var filename = './stmt_prepare_bind_' + code + ' _test.db',
 					db = null,
 					stmt = null;
 
@@ -177,17 +178,87 @@ describe('statement', function() {
 					assert.strictEqual(datatypeCode, sqlite.datatypeCodes.SQLITE_TEXT);
 				})
 				.then(done)
-				.
-			finally(function() {
-				if (stmt !== null) {
-					stmt.finalize();
-				}
-				if (db !== null) {
-					return Q.ninvoke(db, 'close');
-				}
-			})
-				.
-			finally(makeCleanup(filename))
+				.finally(function() {
+					if (stmt !== null) {
+						stmt.finalize();
+					}
+					if (db !== null) {
+						return Q.ninvoke(db, 'close');
+					}
+				})
+				.finally(makeCleanup(filename))
+				.done();
+		});
+		
+		it('int32', function(done) {
+			var filename = './stmt_column_int32_test.db',
+				db = null,
+				stmt = null;
+
+			Q
+				.ninvoke(sqlite, 'open', filename)
+				.then(function(_db) {
+					db = _db;
+					return makeTable('integer')(db);
+				})
+				.then(makeExecuteStatement('insert into test_table_0 (id, col_1) values (100, 96000)'))
+				.then(function() {
+					return Q.ninvoke(db, 'prepare', 'select col_1 from test_table_0');
+				})
+				.then(function(_stmt) {
+					stmt = _stmt;
+					return Q.ninvoke(stmt, 'step');
+				})
+				.then(function() {
+					var value = stmt.columnInteger(0);
+					assert.strictEqual(value, 96000);
+				})
+				.then(done)
+				.finally(function() {
+					if (stmt !== null) {
+						stmt.finalize();
+					}
+					if (db !== null) {
+						return Q.ninvoke(db, 'close');
+					}
+				})
+				.finally(makeCleanup(filename))
+				.done();
+		});
+		
+		it('int64', function(done) {
+			var filename = './stmt_column_int64_test.db',
+				db = null,
+				stmt = null;
+
+			Q
+				.ninvoke(sqlite, 'open', filename)
+				.then(function(_db) {
+					db = _db;
+					return makeTable('integer')(db);
+				})
+				.then(makeExecuteStatement('insert into test_table_0 (id, col_1) values (100, 17188322307)'))
+				.then(function() {
+					return Q.ninvoke(db, 'prepare', 'select col_1 from test_table_0');
+				})
+				.then(function(_stmt) {
+					stmt = _stmt;
+					return Q.ninvoke(stmt, 'step');
+				})
+				.then(function() {
+					var value = stmt.columnInteger(0);
+					assert.strictEqual(value, 17188322307);
+				})
+				.then(done)
+				.finally(function() {
+					if (stmt !== null) {
+						stmt.finalize();
+					}
+					if (db !== null) {
+						return Q.ninvoke(db, 'close');
+					}
+				})
+				.finally(makeCleanup(filename))
 				.done();
 		});
 	});

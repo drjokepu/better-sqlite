@@ -1,3 +1,4 @@
+#include <limits>
 #include <node.h>
 #include <uv.h>
 #include <v8.h>
@@ -23,8 +24,7 @@ static Handle<Value> ErrMsg(const Arguments& args) {
 	    return scope.Close(Undefined());
 	}
 	
-	DbWrapper *db_wrapper = node::ObjectWrap::Unwrap<DbWrapper>(Handle<Object>::Cast(args[0]));
-	
+	auto db_wrapper = node::ObjectWrap::Unwrap<DbWrapper>(Handle<Object>::Cast(args[0]));
 	return scope.Close(String::New(errmsg_sync(db_wrapper->db)));
 }
 
@@ -67,9 +67,9 @@ static Handle<Value> Bind(const Arguments& args) {
 	    return scope.Close(Undefined());
 	}
 	
-	StatementWrapper *statement_wrapper = node::ObjectWrap::Unwrap<StatementWrapper>(Handle<Object>::Cast(args[0]));
-	const int index = args[2]->Int32Value();
-	const int binding_result = BindValue(statement_wrapper->statement, index, args[1]);
+	auto statement_wrapper = node::ObjectWrap::Unwrap<StatementWrapper>(Handle<Object>::Cast(args[0]));
+	const auto index = args[2]->Int32Value();
+	const auto binding_result = BindValue(statement_wrapper->statement, index, args[1]);
 	
 	if (binding_result != BS_UNKNOWN_TYPE) {
 		return scope.Close(Integer::New(binding_result));
@@ -96,10 +96,61 @@ static Handle<Value> ColumnType(const Arguments& args) {
 	    return scope.Close(Undefined());
 	}
 	
-	StatementWrapper *statement_wrapper = node::ObjectWrap::Unwrap<StatementWrapper>(Handle<Object>::Cast(args[0]));
-	const int column_index = args[1]->Int32Value();
-    const int columnDatatypeCode = column_type_sync(statement_wrapper->statement, column_index);
+	auto statement_wrapper = node::ObjectWrap::Unwrap<StatementWrapper>(Handle<Object>::Cast(args[0]));
+	const auto column_index = args[1]->Int32Value();
+    const auto columnDatatypeCode = column_type_sync(statement_wrapper->statement, column_index);
     return scope.Close(Integer::New(columnDatatypeCode));
+}
+
+static Handle<Value> ColumnInteger(const Arguments& args) {
+	HandleScope scope;
+	if (args.Length() < 2) {
+		ThrowException(Exception::TypeError(String::New("Expected at least two arguments.")));
+	    return scope.Close(Undefined());
+	}
+	
+	if (!args[0]->IsObject()) {
+	    ThrowException(Exception::TypeError(String::New("First argument must be an object.")));
+	    return scope.Close(Undefined());
+	}
+	
+	if (!args[1]->IsInt32()) {
+	    ThrowException(Exception::TypeError(String::New("Second argument must be an integer.")));
+	    return scope.Close(Undefined());
+	}
+	
+	auto statement_wrapper = node::ObjectWrap::Unwrap<StatementWrapper>(Handle<Object>::Cast(args[0]));
+	const auto column_index = args[1]->Int32Value();
+    const auto int64value = column_int64_sync(statement_wrapper->statement, column_index);
+	
+	if (int64value <= std::numeric_limits<int32_t>::max()) {
+		return scope.Close(Integer::New(static_cast<int>(int64value)));
+	} else {
+		return scope.Close(Number::New(static_cast<double>(int64value)));
+	}
+}
+
+static Handle<Value> ColumnFloat(const Arguments& args) {
+	HandleScope scope;
+	if (args.Length() < 2) {
+		ThrowException(Exception::TypeError(String::New("Expected at least two arguments.")));
+	    return scope.Close(Undefined());
+	}
+	
+	if (!args[0]->IsObject()) {
+	    ThrowException(Exception::TypeError(String::New("First argument must be an object.")));
+	    return scope.Close(Undefined());
+	}
+	
+	if (!args[1]->IsInt32()) {
+	    ThrowException(Exception::TypeError(String::New("Second argument must be an integer.")));
+	    return scope.Close(Undefined());
+	}
+	
+	auto statement_wrapper = node::ObjectWrap::Unwrap<StatementWrapper>(Handle<Object>::Cast(args[0]));
+	const auto column_index = args[1]->Int32Value();
+    const auto value = column_double_sync(statement_wrapper->statement, column_index);
+	return scope.Close(Number::New(value));
 }
 
 static Handle<Value> Version(const Arguments& args) {
@@ -119,7 +170,7 @@ static Handle<Value> Finalize(const Arguments& args) {
 	    return scope.Close(Undefined());
 	}
 	
-	StatementWrapper *statement_wrapper = node::ObjectWrap::Unwrap<StatementWrapper>(Handle<Object>::Cast(args[0]));
+	auto statement_wrapper = node::ObjectWrap::Unwrap<StatementWrapper>(Handle<Object>::Cast(args[0]));
 	const auto error_code = finalize_sync(statement_wrapper->statement);
 	return scope.Close(Integer::New(error_code));
 }
@@ -158,8 +209,7 @@ static Handle<Value> Open(const Arguments& args) {
 	    return scope.Close(Undefined());
 	}
 	
-	DbWrapper *db_wrapper = node::ObjectWrap::Unwrap<DbWrapper>(Handle<Object>::Cast(args[0]));
-	
+	auto db_wrapper = node::ObjectWrap::Unwrap<DbWrapper>(Handle<Object>::Cast(args[0]));
 	auto db = db_new();
 	auto baton = open_baton_new();
 	
@@ -203,7 +253,7 @@ static Handle<Value> Close(const Arguments& args) {
 	    return scope.Close(Undefined());
 	}
 	
-	DbWrapper *db_wrapper = node::ObjectWrap::Unwrap<DbWrapper>(Handle<Object>::Cast(args[0]));
+	auto db_wrapper = node::ObjectWrap::Unwrap<DbWrapper>(Handle<Object>::Cast(args[0]));
 	auto baton = close_baton_new();
 	
 	baton->req.data = baton;
@@ -254,8 +304,8 @@ static Handle<Value> Prepare(const Arguments& args) {
 	    return scope.Close(Undefined());
 	}
 	
-	DbWrapper *db_wrapper = node::ObjectWrap::Unwrap<DbWrapper>(Handle<Object>::Cast(args[0]));
-	StatementWrapper *statement_wrapper = node::ObjectWrap::Unwrap<StatementWrapper>(Handle<Object>::Cast(args[1]));
+	auto db_wrapper = node::ObjectWrap::Unwrap<DbWrapper>(Handle<Object>::Cast(args[0]));
+	auto statement_wrapper = node::ObjectWrap::Unwrap<StatementWrapper>(Handle<Object>::Cast(args[1]));
 	
 	auto statement = statement_new();
 	auto baton = prepare_baton_new();
@@ -303,7 +353,7 @@ static Handle<Value> Step(const Arguments& args) {
 	    return scope.Close(Undefined());
 	}
 	
-	StatementWrapper *statement_wrapper = node::ObjectWrap::Unwrap<StatementWrapper>(Handle<Object>::Cast(args[0]));
+	auto statement_wrapper = node::ObjectWrap::Unwrap<StatementWrapper>(Handle<Object>::Cast(args[0]));
     auto baton = step_baton_new();
     
 	baton->req.data = baton;
@@ -327,6 +377,8 @@ static void ExportTypes(Handle<Object> exports) {
 static void ExportFunctions(Handle<Object> exports) {
 	AddFunction(exports, "bind", Bind);
 	AddFunction(exports, "close", Close);
+	AddFunction(exports, "columnFloat", ColumnFloat);
+	AddFunction(exports, "columnInteger", ColumnInteger);
     AddFunction(exports, "columnType", ColumnType);
 	AddFunction(exports, "errMsg", ErrMsg);
 	AddFunction(exports, "finalize", Finalize);

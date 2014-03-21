@@ -22,8 +22,16 @@ int bind_null_sync(statement_t *stmt, int index) {
 }
 
 int column_type_sync(statement_t *stmt, int column_index) {
-    return sqlite3_column_type(stmt->sqlite_statement, column_index);
+	return sqlite3_column_type(stmt->sqlite_statement, column_index);
 };
+
+long long column_int64_sync(statement_t *stmt, int column_index) {
+	return sqlite3_column_int64(stmt->sqlite_statement, column_index);
+}
+
+double column_double_sync(statement_t *stmt, int column_index) {
+	return sqlite3_column_double(stmt->sqlite_statement, column_index);
+}
 
 const char *errmsg_sync(db_t *db) {
 	return sqlite3_errmsg(db->sqlite_db);

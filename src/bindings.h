@@ -52,6 +52,8 @@ int bind_text_sync(statement_t *stmt, int index, const char *value, int length);
 int bind_null_sync(statement_t *stmt, int index);
 
 int column_type_sync(statement_t *stmt, int column_index);
+long long column_int64_sync(statement_t *stmt, int column_index);
+double column_double_sync(statement_t *stmt, int column_index);
 
 const char *errmsg_sync(db_t *db);
 const char *libversion_sync(void);
