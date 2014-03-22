@@ -14,8 +14,7 @@ describe('db', function() {
 				assert.strictEqual(db.constructor.name, 'Db');
 			})
 			.then(done)
-			.
-		finally(makeCleanup(filename))
+			.fin(makeCleanup(filename))
 			.done();
 	});
 
@@ -32,8 +31,7 @@ describe('db', function() {
 				return Q.ninvoke(db, 'close');
 			})
 			.then(done)
-			.
-		finally(makeCleanup(filename))
+			.fin(makeCleanup(filename))
 			.done();
 	});
 
@@ -64,8 +62,7 @@ describe('statement', function() {
 					return Q.ninvoke(db, 'close');
 				})
 				.then(done)
-				.
-			finally(makeCleanup(filename))
+				.fin(makeCleanup(filename))
 				.done();
 		});
 
@@ -87,8 +84,7 @@ describe('statement', function() {
 					return Q.ninvoke(db, 'close');
 				})
 				.then(done)
-				.
-			finally(makeCleanup(filename))
+				.fin(makeCleanup(filename))
 				.done();
 		});
 	});
@@ -114,8 +110,7 @@ describe('statement', function() {
 						return Q.ninvoke(db, 'close');
 					})
 					.then(done)
-					.
-				finally(makeCleanup(filename))
+					.fin(makeCleanup(filename))
 					.done();
 			};
 		}
@@ -147,8 +142,7 @@ describe('statement', function() {
 					return Q.ninvoke(db, 'close');
 				})
 				.then(done)
-				.
-			finally(makeCleanup(filename))
+				.fin(makeCleanup(filename))
 				.done();
 		});
 	});
@@ -178,7 +172,7 @@ describe('statement', function() {
 					assert.strictEqual(datatypeCode, sqlite.datatypeCodes.SQLITE_TEXT);
 				})
 				.then(done)
-				.finally(function() {
+				.fin(function() {
 					if (stmt !== null) {
 						stmt.finalize();
 					}
@@ -186,10 +180,11 @@ describe('statement', function() {
 						return Q.ninvoke(db, 'close');
 					}
 				})
-				.finally(makeCleanup(filename))
+				.
+			finally(makeCleanup(filename))
 				.done();
 		});
-		
+
 		it('int32', function(done) {
 			var filename = './stmt_column_int32_test.db',
 				db = null,
@@ -214,7 +209,7 @@ describe('statement', function() {
 					assert.strictEqual(value, 96000);
 				})
 				.then(done)
-				.finally(function() {
+				.fin(function() {
 					if (stmt !== null) {
 						stmt.finalize();
 					}
@@ -222,10 +217,10 @@ describe('statement', function() {
 						return Q.ninvoke(db, 'close');
 					}
 				})
-				.finally(makeCleanup(filename))
+				.fin(makeCleanup(filename))
 				.done();
 		});
-		
+
 		it('int64', function(done) {
 			var filename = './stmt_column_int64_test.db',
 				db = null,
@@ -250,7 +245,7 @@ describe('statement', function() {
 					assert.strictEqual(value, 17188322307);
 				})
 				.then(done)
-				.finally(function() {
+				.fin(function() {
 					if (stmt !== null) {
 						stmt.finalize();
 					}
@@ -258,7 +253,7 @@ describe('statement', function() {
 						return Q.ninvoke(db, 'close');
 					}
 				})
-				.finally(makeCleanup(filename))
+				.fin(makeCleanup(filename))
 				.done();
 		});
 	});
