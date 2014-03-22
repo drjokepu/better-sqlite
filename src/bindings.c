@@ -33,6 +33,10 @@ double column_double_sync(statement_t *stmt, int column_index) {
 	return sqlite3_column_double(stmt->sqlite_statement, column_index);
 }
 
+const char *column_text_sync(statement_t *stmt, int column_index) {
+	return (const char *)sqlite3_column_text(stmt->sqlite_statement, column_index);
+}
+
 const char *errmsg_sync(db_t *db) {
 	return sqlite3_errmsg(db->sqlite_db);
 }

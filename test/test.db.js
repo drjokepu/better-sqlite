@@ -256,6 +256,34 @@ describe('low level', function() {
 					.fin(makeCleanup(scope))
 					.fail(makeReportError(scope));
 			});
+			
+			it('text', function() {
+				var scope = {
+					filename: './stmt_column_text_test.db'
+				};
+
+				return Q
+					.ninvoke(sqlite, 'open', scope.filename)
+					.then(function(db) {
+						scope.db = db;
+						return makeTable('real')(scope.db);
+					})
+					.then(makeExecuteStatement('insert into test_table_0 (id, col_1) values (100, \'Hello, World!\')'))
+					.then(function() {
+						return Q.ninvoke(scope.db, 'prepare', 'select col_1 from test_table_0');
+					})
+					.then(function(stmt) {
+						scope.stmt = stmt;
+						return Q.ninvoke(stmt, 'step');
+					})
+					.then(function() {
+						var value = scope.stmt.columnText(0);
+						assert.strictEqual(value, 'Hello, World!');
+					})
+					.fin(makeCloseStatementAndDb(scope))
+					.fin(makeCleanup(scope))
+					.fail(makeReportError(scope));
+			});
 		});
 	});
 });

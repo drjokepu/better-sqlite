@@ -153,6 +153,29 @@ static Handle<Value> ColumnFloat(const Arguments& args) {
 	return scope.Close(Number::New(value));
 }
 
+static Handle<Value> ColumnText(const Arguments& args) {
+	HandleScope scope;
+	if (args.Length() < 2) {
+		ThrowException(Exception::TypeError(String::New("Expected at least two arguments.")));
+	    return scope.Close(Undefined());
+	}
+	
+	if (!args[0]->IsObject()) {
+	    ThrowException(Exception::TypeError(String::New("First argument must be an object.")));
+	    return scope.Close(Undefined());
+	}
+	
+	if (!args[1]->IsInt32()) {
+	    ThrowException(Exception::TypeError(String::New("Second argument must be an integer.")));
+	    return scope.Close(Undefined());
+	}
+	
+	auto statement_wrapper = node::ObjectWrap::Unwrap<StatementWrapper>(Handle<Object>::Cast(args[0]));
+	const auto column_index = args[1]->Int32Value();
+    const auto value = column_text_sync(statement_wrapper->statement, column_index);
+	return scope.Close(String::New(value));
+}
+
 static Handle<Value> Version(const Arguments& args) {
 	HandleScope scope;
 	return scope.Close(String::New(libversion_sync()));
@@ -379,6 +402,7 @@ static void ExportFunctions(Handle<Object> exports) {
 	AddFunction(exports, "close", Close);
 	AddFunction(exports, "columnFloat", ColumnFloat);
 	AddFunction(exports, "columnInteger", ColumnInteger);
+	AddFunction(exports, "columnText", ColumnText);
     AddFunction(exports, "columnType", ColumnType);
 	AddFunction(exports, "errMsg", ErrMsg);
 	AddFunction(exports, "finalize", Finalize);
