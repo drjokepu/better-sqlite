@@ -256,6 +256,42 @@ describe('statement', function() {
 				.fin(makeCleanup(filename))
 				.done();
 		});
+		
+		it('float', function(done) {
+			var filename = './stmt_column_float_test.db',
+				db = null,
+				stmt = null;
+
+			Q
+				.ninvoke(sqlite, 'open', filename)
+				.then(function(_db) {
+					db = _db;
+					return makeTable('real')(db);
+				})
+				.then(makeExecuteStatement('insert into test_table_0 (id, col_1) values (100, 340.5)'))
+				.then(function() {
+					return Q.ninvoke(db, 'prepare', 'select col_1 from test_table_0');
+				})
+				.then(function(_stmt) {
+					stmt = _stmt;
+					return Q.ninvoke(stmt, 'step');
+				})
+				.then(function() {
+					var value = stmt.columnFloat(0);
+					assert.strictEqual(value, 340.5);
+				})
+				.then(done)
+				.fin(function() {
+					if (stmt !== null) {
+						stmt.finalize();
+					}
+					if (db !== null) {
+						return Q.ninvoke(db, 'close');
+					}
+				})
+				.fin(makeCleanup(filename))
+				.done();
+		});
 	});
 });
 
