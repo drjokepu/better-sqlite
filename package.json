@@ -18,6 +18,6 @@
 		"grunt-contrib-jshint": "*",
 		"grunt-jsbeautifier": "*",
 		"mocha": "*",
-		"q": "*"
+		"q": "1.0.x"
 	}
 }
