@@ -53,6 +53,10 @@ const char *sql_sync(statement_t *stmt) {
 	return sqlite3_sql(stmt->sqlite_statement);
 };
 
+int get_autocommit_sync(db_t *db) {
+	return sqlite3_get_autocommit(db->sqlite_db);
+} 
+
 const char *errmsg_sync(db_t *db) {
 	return sqlite3_errmsg(db->sqlite_db);
 }

@@ -24,6 +24,32 @@ describe('low level', function() {
 				.fin(makeCleanup(scope))
 				.fail(makeReportError(scope));
 		});
+		
+		it('get autocommit', function() {
+			var scope = {
+				filename: './stmt_get_autocommit_test.db'
+			};
+
+			return Q
+				.ninvoke(sqlite, 'open', scope.filename)
+				.then(function(db) {
+					scope.db = db;
+					assert.strictEqual(scope.db.getAutocommit(), true);
+					return scope.db;
+				})
+				.then(makeExecuteStatement('begin'))
+				.then(function() {
+					assert.strictEqual(scope.db.getAutocommit(), false);
+					return scope.db;
+				})
+				.then(makeExecuteStatement('commit'))
+				.then(function(stmt) {
+					assert.strictEqual(scope.db.getAutocommit(), true);
+				})
+				.fin(makeCloseStatementAndDb(scope))
+				.fin(makeCleanup(scope))
+				.fail(makeReportError(scope));
+		});
 
 		it('version', function() {
 			var version = sqlite.version();
