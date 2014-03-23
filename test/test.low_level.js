@@ -18,7 +18,7 @@ describe('low level', function() {
 					scope.db = db;
 					assert.notStrictEqual(db, null);
 					assert.notStrictEqual(db, undefined);
-					assert.strictEqual(db.constructor.name, 'Db');
+					assert.strictEqual(db.constructor.name, 'LowLevelDb');
 					return Q.ninvoke(db, 'close');
 				})
 				.fin(makeCleanup(scope))
@@ -75,7 +75,7 @@ describe('low level', function() {
 						scope.stmt = stmt;
 						assert.notStrictEqual(stmt, null);
 						assert.notStrictEqual(stmt, undefined);
-						assert.strictEqual(stmt.constructor.name, 'Statement');
+						assert.strictEqual(stmt.constructor.name, 'LowLevelStatement');
 						stmt.finalize();
 						return Q.ninvoke(scope.db, 'close');
 					})
