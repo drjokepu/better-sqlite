@@ -45,6 +45,7 @@ name##_baton_t *name##_baton_new(void); \
 void name##_baton_free(name##_baton_t *baton); \
 void name##_async(name##_baton_t *baton);
 
+int clear_bindings_sync(statement_t *stmt);
 int bind_int_sync(statement_t *stmt, int index, int value);
 int bind_int64_sync(statement_t *stmt, int index, long long value);
 int bind_double_sync(statement_t *stmt, int index, double value);
@@ -56,6 +57,7 @@ int column_type_sync(statement_t *stmt, int column_index);
 long long column_int64_sync(statement_t *stmt, int column_index);
 double column_double_sync(statement_t *stmt, int column_index);
 const char *column_text_sync(statement_t *stmt, int column_index);
+int reset_sync(statement_t *stmt);
 const char *sql_sync(statement_t *stmt);
 
 const char *errmsg_sync(db_t *db);

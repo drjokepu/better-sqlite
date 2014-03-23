@@ -28,6 +28,23 @@ static Handle<Value> ErrMsg(const Arguments& args) {
 	return scope.Close(String::New(errmsg_sync(db_wrapper->db)));
 }
 
+static Handle<Value> ClearBindings(const Arguments& args) {
+	HandleScope scope;
+	if (args.Length() < 1) {
+		ThrowException(Exception::TypeError(String::New("Expected at least one argument.")));
+	    return scope.Close(Undefined());
+	}
+	
+	if (!args[0]->IsObject()) {
+	    ThrowException(Exception::TypeError(String::New("First argument must be an object.")));
+	    return scope.Close(Undefined());
+	}
+	
+	auto statement_wrapper = node::ObjectWrap::Unwrap<StatementWrapper>(Handle<Object>::Cast(args[0]));
+    const auto error_code = clear_bindings_sync(statement_wrapper->statement);
+    return scope.Close(Integer::New(error_code));
+}
+
 static int BindValue(statement_t *stmt, const int index, Handle<Value> value) {
 	if (value->IsInt32()) {
 		return bind_int_sync(stmt, index, value->Int32Value());
@@ -191,6 +208,23 @@ static Handle<Value> ColumnText(const Arguments& args) {
 	const auto column_index = args[1]->Int32Value();
     const auto value = column_text_sync(statement_wrapper->statement, column_index);
 	return scope.Close(String::New(value));
+}
+
+static Handle<Value> Reset(const Arguments& args) {
+	HandleScope scope;
+	if (args.Length() < 1) {
+		ThrowException(Exception::TypeError(String::New("Expected at least one argument.")));
+	    return scope.Close(Undefined());
+	}
+	
+	if (!args[0]->IsObject()) {
+	    ThrowException(Exception::TypeError(String::New("First argument must be an object.")));
+	    return scope.Close(Undefined());
+	}
+	
+	auto statement_wrapper = node::ObjectWrap::Unwrap<StatementWrapper>(Handle<Object>::Cast(args[0]));
+    const auto error_code = reset_sync(statement_wrapper->statement);
+    return scope.Close(Integer::New(error_code));
 }
 
 static Handle<Value> Sql(const Arguments& args) {
@@ -433,6 +467,7 @@ static void ExportTypes(Handle<Object> exports) {
 
 static void ExportFunctions(Handle<Object> exports) {
 	AddFunction(exports, "bind", Bind);
+	AddFunction(exports, "clearBindings", ClearBindings);
 	AddFunction(exports, "close", Close);
 	AddFunction(exports, "columnCount", ColumnCount);
 	AddFunction(exports, "columnFloat", ColumnFloat);
@@ -443,6 +478,7 @@ static void ExportFunctions(Handle<Object> exports) {
 	AddFunction(exports, "finalize", Finalize);
 	AddFunction(exports, "open", Open);
 	AddFunction(exports, "prepare", Prepare);
+	AddFunction(exports, "reset", Reset);
 	AddFunction(exports, "sql", Sql);
     AddFunction(exports, "step", Step);
 	AddFunction(exports, "version", Version);

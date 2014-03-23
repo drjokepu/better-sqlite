@@ -1,6 +1,10 @@
 #include <stdlib.h>
 #include "bindings.h"
 
+int clear_bindings_sync(statement_t *stmt) {
+	return sqlite3_clear_bindings(stmt->sqlite_statement);
+}
+
 int bind_int_sync(statement_t *stmt, int index, int value) {
 	return sqlite3_bind_int(stmt->sqlite_statement, index, value);
 }
@@ -39,6 +43,10 @@ double column_double_sync(statement_t *stmt, int column_index) {
 
 const char *column_text_sync(statement_t *stmt, int column_index) {
 	return (const char *)sqlite3_column_text(stmt->sqlite_statement, column_index);
+}
+
+int reset_sync(statement_t *stmt) {
+	return sqlite3_reset(stmt->sqlite_statement);
 }
 
 const char *sql_sync(statement_t *stmt) {

@@ -3,6 +3,8 @@ var fs = require('fs');
 var Q = require('q');
 var sqlite = require('..').lowLevel;
 
+Q.longStackSupport = true;
+
 describe('low level', function() {
 	describe('db', function() {
 		it('open & close', function() {
@@ -30,16 +32,6 @@ describe('low level', function() {
 	});
 
 	describe('statement', function() {
-		function makeCloseStatementAndDb(scope) {
-			return function closeStatementAndDb() {
-				if (scope.stmt) {
-					scope.stmt.finalize();
-				}
-				if (scope.db) {
-					return Q.ninvoke(scope.db, 'close');
-				}
-			};
-		}
 		
 		describe('prepare', function() {
 			it('success', function() {
@@ -74,7 +66,7 @@ describe('low level', function() {
 					.ninvoke(sqlite, 'open', scope.filename)
 					.then(function(db) {
 						scope.db = db;
-						return Q.ninvoke(db, 'prepare', 'select no_test_colimn_0 from no_test_table_1;');
+						return Q.ninvoke(db, 'prepare', 'select no_test_column_0 from no_test_table_1;');
 					})
 					.then(function(stmt) {
 						assert.fail('no error raised');
@@ -93,7 +85,7 @@ describe('low level', function() {
 				return function() {
 					var code = Math.floor(Math.random() * 10000000);
 					var scope = {
-						filename: './stmt_prepare_bind_' + code + ' _test.db'
+						filename: './stmt_bind_' + code + ' _test.db'
 					};
 
 					return Q
@@ -117,6 +109,64 @@ describe('low level', function() {
 			it('double', makeBindTest(-140.25));
 			it('text', makeBindTest('let it be'));
 			it('null', makeBindTest(null));
+			
+			it('clear', function() {
+				var scope = {
+					filename: './stmt_clear_bindings_test.db'
+				};
+		
+				return Q
+					.ninvoke(sqlite, 'open', scope.filename)
+					.then(function(db) {
+						scope.db = db;
+						return makeTable('integer')(scope.db);
+					})
+					.then(function() {
+						return Q.ninvoke(scope.db, 'prepare', 'insert into test_table_0 (id, col_1) values (?, ?)');
+					})
+					.then(function(stmt) {
+						scope.insertStmt = stmt;
+						scope.insertStmt.bind(1);
+						scope.insertStmt.bind(1200);
+						return Q.ninvoke(scope.insertStmt, 'step');
+					})
+					.then(function(code) {
+						assert.strictEqual(code, sqlite.errorCodes.SQLITE_DONE);
+						scope.insertStmt.reset();
+						scope.insertStmt.clearBindings();
+						scope.insertStmt.bind(2);
+						return Q.ninvoke(scope.insertStmt, 'step');
+					})
+					.then(function(code) {
+						assert.strictEqual(code, sqlite.errorCodes.SQLITE_DONE);
+						scope.insertStmt.finalize();
+						return Q.ninvoke(scope.db, 'prepare', 'select id, col_1 from test_table_0 order by id');
+					})
+					.then(function(stmt) {
+						scope.selectStmt = stmt;
+						return Q.ninvoke(scope.selectStmt, 'step');
+					})
+					.then(function(code) {
+						assert.strictEqual(code, sqlite.errorCodes.SQLITE_ROW);
+						assert.strictEqual(scope.selectStmt.columnInteger(0), 1);
+						assert.strictEqual(scope.selectStmt.columnType(1), sqlite.datatypeCodes.SQLITE_INTEGER);
+						assert.strictEqual(scope.selectStmt.columnInteger(1), 1200);
+						return Q.ninvoke(scope.selectStmt, 'step');
+					})
+					.then(function(code) {
+						assert.strictEqual(code, sqlite.errorCodes.SQLITE_ROW);
+						assert.strictEqual(scope.selectStmt.columnInteger(0), 2);
+						assert.strictEqual(scope.selectStmt.columnType(1), sqlite.datatypeCodes.SQLITE_NULL);
+						return Q.ninvoke(scope.selectStmt, 'step');
+					})
+					.then(function(code) {
+						assert.strictEqual(code, sqlite.errorCodes.SQLITE_DONE);
+						scope.selectStmt.finalize();
+					})
+					.fin(makeCloseStatementAndDb(scope))
+					.fin(makeCleanup(scope))
+					.fail(makeReportError(scope));
+			});
 		});
 
 		describe('step', function() {
@@ -129,7 +179,10 @@ describe('low level', function() {
 					.ninvoke(sqlite, 'open', scope.filename)
 					.then(function(db) {
 						scope.db = db;
-						return Q.ninvoke(db, 'prepare', 'create table test_table_0 (id integer not null, name text not null);');
+						return makeTable('integer')(scope.db);
+					})
+					.then(function() {
+						return Q.ninvoke(scope.db, 'prepare', 'insert into test_table_0 (id, col_1) values (1, 9000)');
 					})
 					.then(function(stmt) {
 						scope.stmt = stmt;
@@ -342,6 +395,75 @@ describe('low level', function() {
 				.fin(makeCleanup(scope))
 				.fail(makeReportError(scope));
 		});
+		
+		it('reset', function() {
+			var scope = {
+				filename: './stmt_reset_test.db'
+			};
+		
+			return Q
+				.ninvoke(sqlite, 'open', scope.filename)
+				.then(function(db) {
+					scope.db = db;
+					return makeTable('integer')(scope.db);
+				})
+				.then(function() {
+					return Q.ninvoke(scope.db, 'prepare', 'insert into test_table_0 (id, col_1) values (?, ?)');
+				})
+				.then(function(stmt) {
+					scope.insertStmt = stmt;
+					scope.insertStmt.bind(1);
+					scope.insertStmt.bind(1200);
+					return Q.ninvoke(scope.insertStmt, 'step');
+				})
+				.then(function(code) {
+					assert.strictEqual(code, sqlite.errorCodes.SQLITE_DONE);
+					scope.insertStmt.reset();
+					scope.insertStmt.bind(2);
+					scope.insertStmt.bind(3000);
+					return Q.ninvoke(scope.insertStmt, 'step');
+				})
+				.then(function(code) {
+					assert.strictEqual(code, sqlite.errorCodes.SQLITE_DONE);
+					scope.insertStmt.reset();
+					scope.insertStmt.bind(3);
+					return Q.ninvoke(scope.insertStmt, 'step');
+				})
+				.then(function(code) {
+					assert.strictEqual(code, sqlite.errorCodes.SQLITE_DONE);
+					scope.insertStmt.finalize();
+					return Q.ninvoke(scope.db, 'prepare', 'select id, col_1 from test_table_0 order by id');
+				})
+				.then(function(stmt) {
+					scope.selectStmt = stmt;
+					return Q.ninvoke(scope.selectStmt, 'step');
+				})
+				.then(function(code) {
+					assert.strictEqual(code, sqlite.errorCodes.SQLITE_ROW);
+					assert.strictEqual(scope.selectStmt.columnInteger(0), 1);
+					assert.strictEqual(scope.selectStmt.columnInteger(1), 1200);
+					return Q.ninvoke(scope.selectStmt, 'step');
+				})
+				.then(function(code) {
+					assert.strictEqual(code, sqlite.errorCodes.SQLITE_ROW);
+					assert.strictEqual(scope.selectStmt.columnInteger(0), 2);
+					assert.strictEqual(scope.selectStmt.columnInteger(1), 3000);
+					return Q.ninvoke(scope.selectStmt, 'step');
+				})
+				.then(function(code) {
+					assert.strictEqual(code, sqlite.errorCodes.SQLITE_ROW);
+					assert.strictEqual(scope.selectStmt.columnInteger(0), 3);
+					assert.strictEqual(scope.selectStmt.columnInteger(1), 3000);
+					return Q.ninvoke(scope.selectStmt, 'step');
+				})
+				.then(function(code) {
+					assert.strictEqual(code, sqlite.errorCodes.SQLITE_DONE);
+					scope.selectStmt.finalize();
+				})
+				.fin(makeCloseStatementAndDb(scope))
+				.fin(makeCleanup(scope))
+				.fail(makeReportError(scope));
+		});
 	});
 });
 
@@ -363,6 +485,17 @@ function makeExecuteStatement(sql) {
 
 function makeTable(type) {
 	return makeExecuteStatement('create table test_table_0 (id integer not null, col_1 ' + type + ');');
+}
+
+function makeCloseStatementAndDb(scope) {
+	return function closeStatementAndDb() {
+		if (scope.stmt) {
+			scope.stmt.finalize();
+		}
+		if (scope.db) {
+			return Q.ninvoke(scope.db, 'close');
+		}
+	};
 }
 
 function makeCleanup(scope) {
