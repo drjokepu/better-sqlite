@@ -24,7 +24,7 @@ describe('low level', function() {
 				.fin(makeCleanup(scope))
 				.fail(makeReportError(scope));
 		});
-		
+
 		it('get autocommit', function() {
 			var scope = {
 				filename: './stmt_get_autocommit_test.db'
@@ -58,7 +58,7 @@ describe('low level', function() {
 	});
 
 	describe('statement', function() {
-		
+
 		describe('prepare', function() {
 			it('success', function() {
 				var scope = {
@@ -135,12 +135,12 @@ describe('low level', function() {
 			it('double', makeBindTest(-140.25));
 			it('text', makeBindTest('let it be'));
 			it('null', makeBindTest(null));
-			
+
 			it('clear', function() {
 				var scope = {
 					filename: './stmt_clear_bindings_test.db'
 				};
-		
+
 				return Q
 					.ninvoke(sqlite, 'open', scope.filename)
 					.then(function(db) {
@@ -363,7 +363,7 @@ describe('low level', function() {
 					.fin(makeCleanup(scope))
 					.fail(makeReportError(scope));
 			});
-			
+
 			it('text', function() {
 				var scope = {
 					filename: './stmt_column_text_test.db'
@@ -392,7 +392,7 @@ describe('low level', function() {
 					.fail(makeReportError(scope));
 			});
 		});
-		
+
 		it('sql', function() {
 			var scope = {
 				filename: './stmt_sql_test.db',
@@ -421,12 +421,12 @@ describe('low level', function() {
 				.fin(makeCleanup(scope))
 				.fail(makeReportError(scope));
 		});
-		
+
 		it('reset', function() {
 			var scope = {
 				filename: './stmt_reset_test.db'
 			};
-		
+
 			return Q
 				.ninvoke(sqlite, 'open', scope.filename)
 				.then(function(db) {
