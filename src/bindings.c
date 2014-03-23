@@ -41,6 +41,10 @@ const char *column_text_sync(statement_t *stmt, int column_index) {
 	return (const char *)sqlite3_column_text(stmt->sqlite_statement, column_index);
 }
 
+const char *sql_sync(statement_t *stmt) {
+	return sqlite3_sql(stmt->sqlite_statement);
+};
+
 const char *errmsg_sync(db_t *db) {
 	return sqlite3_errmsg(db->sqlite_db);
 }

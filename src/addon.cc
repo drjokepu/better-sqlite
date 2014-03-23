@@ -193,6 +193,23 @@ static Handle<Value> ColumnText(const Arguments& args) {
 	return scope.Close(String::New(value));
 }
 
+static Handle<Value> Sql(const Arguments& args) {
+	HandleScope scope;
+	if (args.Length() < 1) {
+		ThrowException(Exception::TypeError(String::New("Expected at least one argument.")));
+	    return scope.Close(Undefined());
+	}
+	
+	if (!args[0]->IsObject()) {
+	    ThrowException(Exception::TypeError(String::New("First argument must be an object.")));
+	    return scope.Close(Undefined());
+	}
+	
+	auto statement_wrapper = node::ObjectWrap::Unwrap<StatementWrapper>(Handle<Object>::Cast(args[0]));
+    const auto sql = sql_sync(statement_wrapper->statement);
+    return scope.Close(String::New(sql));
+}
+
 static Handle<Value> Version(const Arguments& args) {
 	HandleScope scope;
 	return scope.Close(String::New(libversion_sync()));
@@ -426,6 +443,7 @@ static void ExportFunctions(Handle<Object> exports) {
 	AddFunction(exports, "finalize", Finalize);
 	AddFunction(exports, "open", Open);
 	AddFunction(exports, "prepare", Prepare);
+	AddFunction(exports, "sql", Sql);
     AddFunction(exports, "step", Step);
 	AddFunction(exports, "version", Version);
 }

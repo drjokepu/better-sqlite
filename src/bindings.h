@@ -56,6 +56,7 @@ int column_type_sync(statement_t *stmt, int column_index);
 long long column_int64_sync(statement_t *stmt, int column_index);
 double column_double_sync(statement_t *stmt, int column_index);
 const char *column_text_sync(statement_t *stmt, int column_index);
+const char *sql_sync(statement_t *stmt);
 
 const char *errmsg_sync(db_t *db);
 const char *libversion_sync(void);

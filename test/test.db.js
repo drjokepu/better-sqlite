@@ -30,6 +30,17 @@ describe('low level', function() {
 	});
 
 	describe('statement', function() {
+		function makeCloseStatementAndDb(scope) {
+			return function closeStatementAndDb() {
+				if (scope.stmt) {
+					scope.stmt.finalize();
+				}
+				if (scope.db) {
+					return Q.ninvoke(scope.db, 'close');
+				}
+			};
+		}
+		
 		describe('prepare', function() {
 			it('success', function() {
 				var scope = {
@@ -134,17 +145,6 @@ describe('low level', function() {
 		});
 
 		describe('column', function() {
-			function makeCloseStatementAndDb(scope) {
-				return function closeStatementAndDb() {
-					if (scope.stmt) {
-						scope.stmt.finalize();
-					}
-					if (scope.db) {
-						return Q.ninvoke(scope.db, 'close');
-					}
-				};
-			}
-			
 			it('count', function() {
 				var scope = {
 					filename: './stmt_column_count_test.db'
@@ -312,6 +312,35 @@ describe('low level', function() {
 					.fin(makeCleanup(scope))
 					.fail(makeReportError(scope));
 			});
+		});
+		
+		it('sql', function() {
+			var scope = {
+				filename: './stmt_sql_test.db',
+				sql: 'select id, col_1 from test_table_0'
+			};
+
+			return Q
+				.ninvoke(sqlite, 'open', scope.filename)
+				.then(function(db) {
+					scope.db = db;
+					return makeTable('text')(scope.db);
+				})
+				.then(makeExecuteStatement('insert into test_table_0 (id, col_1) values (100, \'hello\')'))
+				.then(function() {
+					return Q.ninvoke(scope.db, 'prepare', scope.sql);
+				})
+				.then(function(stmt) {
+					scope.stmt = stmt;
+					return Q.ninvoke(stmt, 'step');
+				})
+				.then(function() {
+					var sql = scope.stmt.sql();
+					assert.strictEqual(sql, scope.sql);
+				})
+				.fin(makeCloseStatementAndDb(scope))
+				.fin(makeCleanup(scope))
+				.fail(makeReportError(scope));
 		});
 	});
 });
