@@ -55,7 +55,15 @@ const char *sql_sync(statement_t *stmt) {
 
 int get_autocommit_sync(db_t *db) {
 	return sqlite3_get_autocommit(db->sqlite_db);
-} 
+}
+
+int changes_sync(db_t *db) {
+	return sqlite3_changes(db->sqlite_db);
+}
+
+long long last_insert_rowid_sync(db_t *db) {
+	return sqlite3_last_insert_rowid(db->sqlite_db);
+}
 
 const char *errmsg_sync(db_t *db) {
 	return sqlite3_errmsg(db->sqlite_db);

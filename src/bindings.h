@@ -61,6 +61,8 @@ int reset_sync(statement_t *stmt);
 const char *sql_sync(statement_t *stmt);
 
 int get_autocommit_sync(db_t *db);
+int changes_sync(db_t *db);
+long long last_insert_rowid_sync(db_t *db);
 const char *errmsg_sync(db_t *db);
 const char *libversion_sync(void);
 int finalize_sync(statement_t *stmt);

@@ -27,7 +27,7 @@ describe('low level', function() {
 
 		it('get autocommit', function() {
 			var scope = {
-				filename: './stmt_get_autocommit_test.db'
+				filename: './db_get_autocommit_test.db'
 			};
 
 			return Q
@@ -45,6 +45,84 @@ describe('low level', function() {
 				.then(makeExecuteStatement('commit'))
 				.then(function(stmt) {
 					assert.strictEqual(scope.db.getAutocommit(), true);
+				})
+				.fin(makeCloseStatementAndDb(scope))
+				.fin(makeCleanup(scope))
+				.fail(makeReportError(scope));
+		});
+		
+		it('last insert row id', function() {
+			var scope = {
+				filename: './db_last_insert_rowid_test.db'
+			};
+
+			return Q
+				.ninvoke(sqlite, 'open', scope.filename)
+				.then(function(db) {
+					scope.db = db;
+					return makeTable('integer')(scope.db);
+				})
+				.then(function() {
+					return Q.ninvoke(scope.db, 'prepare', 'insert into test_table_0 (id, col_1) values (14000, 33333)');
+				})
+				.then(function(stmt) {
+					scope.stmt = stmt;
+					return Q.ninvoke(stmt, 'step');
+				})
+				.then(function() {
+					scope.stmt.finalize();
+					delete scope.stmt;
+					assert.strictEqual(scope.db.lastInsertRowId(), 14000);
+				})
+				.fin(makeCloseStatementAndDb(scope))
+				.fin(makeCleanup(scope))
+				.fail(makeReportError(scope));
+		});
+		
+		it('changes', function() {
+			var scope = {
+				filename: './db_changes_test.db'
+			};
+
+			return Q
+				.ninvoke(sqlite, 'open', scope.filename)
+				.then(function(db) {
+					scope.db = db;
+					return makeTable('integer')(scope.db);
+				})
+				.then(function() {
+					return Q.ninvoke(scope.db, 'prepare', 'insert into test_table_0 (id, col_1) values (?, ?)');
+				})
+				.then(function(stmt) {
+					scope.insertStmt = stmt;
+					scope.insertStmt.bind(1);
+					scope.insertStmt.bind(4000);
+					return Q.ninvoke(scope.insertStmt, 'step');
+				})
+				.then(function(code) {
+					assert.strictEqual(code, sqlite.errorCodes.SQLITE_DONE);
+					assert.strictEqual(scope.db.changes(), 1);
+					scope.insertStmt.reset();
+					scope.insertStmt.bind(2);
+					scope.insertStmt.bind(5000);
+					return Q.ninvoke(scope.insertStmt, 'step');
+				})
+				.then(function(code) {
+					scope.insertStmt.finalize();
+					delete scope.insertStmt;
+					assert.strictEqual(code, sqlite.errorCodes.SQLITE_DONE);
+					assert.strictEqual(scope.db.changes(), 1);
+					return Q.ninvoke(scope.db, 'prepare', 'update test_table_0 set col_1 = 9999');
+				})
+				.then(function(stmt) {
+					scope.updateStmt = stmt;
+					return Q.ninvoke(scope.updateStmt, 'step');
+				})
+				.then(function(code) {
+					scope.updateStmt.finalize();
+					delete scope.updateStmt;
+					assert.strictEqual(code, sqlite.errorCodes.SQLITE_DONE);
+					assert.strictEqual(scope.db.changes(), 2);
 				})
 				.fin(makeCloseStatementAndDb(scope))
 				.fin(makeCleanup(scope))
@@ -510,7 +588,7 @@ function makeExecuteStatement(sql) {
 }
 
 function makeTable(type) {
-	return makeExecuteStatement('create table test_table_0 (id integer not null, col_1 ' + type + ');');
+	return makeExecuteStatement('create table test_table_0 (id integer primary key not null, col_1 ' + type + ');');
 }
 
 function makeCloseStatementAndDb(scope) {

@@ -44,6 +44,38 @@ static Handle<Value> GetAutocommit(const Arguments& args) {
 	return scope.Close(Boolean::New(get_autocommit_sync(db_wrapper->db) != 0));
 }
 
+static Handle<Value> Changes(const Arguments& args) {
+	HandleScope scope;
+	if (args.Length() < 1) {
+		ThrowException(Exception::TypeError(String::New("Expected at least one arguments.")));
+	    return scope.Close(Undefined());
+	}
+	
+	if (!args[0]->IsObject()) {
+	    ThrowException(Exception::TypeError(String::New("First argument must be an object.")));
+	    return scope.Close(Undefined());
+	}
+	
+	auto db_wrapper = node::ObjectWrap::Unwrap<DbWrapper>(Handle<Object>::Cast(args[0]));
+	return scope.Close(Integer::New(changes_sync(db_wrapper->db)));
+}
+
+static Handle<Value> LastInsertRowId(const Arguments& args) {
+	HandleScope scope;
+	if (args.Length() < 1) {
+		ThrowException(Exception::TypeError(String::New("Expected at least one arguments.")));
+	    return scope.Close(Undefined());
+	}
+	
+	if (!args[0]->IsObject()) {
+	    ThrowException(Exception::TypeError(String::New("First argument must be an object.")));
+	    return scope.Close(Undefined());
+	}
+	
+	auto db_wrapper = node::ObjectWrap::Unwrap<DbWrapper>(Handle<Object>::Cast(args[0]));
+	return scope.Close(Number::New(static_cast<double>(last_insert_rowid_sync(db_wrapper->db))));
+}
+
 static Handle<Value> ClearBindings(const Arguments& args) {
 	HandleScope scope;
 	if (args.Length() < 1) {
@@ -483,6 +515,7 @@ static void ExportTypes(Handle<Object> exports) {
 
 static void ExportFunctions(Handle<Object> exports) {
 	AddFunction(exports, "bind", Bind);
+	AddFunction(exports, "changes", Changes);
 	AddFunction(exports, "clearBindings", ClearBindings);
 	AddFunction(exports, "close", Close);
 	AddFunction(exports, "columnCount", ColumnCount);
@@ -493,6 +526,7 @@ static void ExportFunctions(Handle<Object> exports) {
 	AddFunction(exports, "errMsg", ErrMsg);
 	AddFunction(exports, "finalize", Finalize);
 	AddFunction(exports, "getAutocommit", GetAutocommit);
+	AddFunction(exports, "lastInsertRowId", LastInsertRowId);
 	AddFunction(exports, "open", Open);
 	AddFunction(exports, "prepare", Prepare);
 	AddFunction(exports, "reset", Reset);
