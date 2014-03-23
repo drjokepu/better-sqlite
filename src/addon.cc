@@ -79,6 +79,23 @@ static Handle<Value> Bind(const Arguments& args) {
 	}
 }
 
+static Handle<Value> ColumnCount(const Arguments& args) {
+	HandleScope scope;
+	if (args.Length() < 1) {
+		ThrowException(Exception::TypeError(String::New("Expected at least one argument.")));
+	    return scope.Close(Undefined());
+	}
+	
+	if (!args[0]->IsObject()) {
+	    ThrowException(Exception::TypeError(String::New("First argument must be an object.")));
+	    return scope.Close(Undefined());
+	}
+	
+	auto statement_wrapper = node::ObjectWrap::Unwrap<StatementWrapper>(Handle<Object>::Cast(args[0]));
+    const auto columnCount = column_count_sync(statement_wrapper->statement);
+    return scope.Close(Integer::New(columnCount));
+}
+
 static Handle<Value> ColumnType(const Arguments& args) {
 	HandleScope scope;
 	if (args.Length() < 2) {
@@ -400,6 +417,7 @@ static void ExportTypes(Handle<Object> exports) {
 static void ExportFunctions(Handle<Object> exports) {
 	AddFunction(exports, "bind", Bind);
 	AddFunction(exports, "close", Close);
+	AddFunction(exports, "columnCount", ColumnCount);
 	AddFunction(exports, "columnFloat", ColumnFloat);
 	AddFunction(exports, "columnInteger", ColumnInteger);
 	AddFunction(exports, "columnText", ColumnText);

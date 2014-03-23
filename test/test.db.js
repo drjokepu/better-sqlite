@@ -144,6 +144,34 @@ describe('low level', function() {
 					}
 				};
 			}
+			
+			it('count', function() {
+				var scope = {
+					filename: './stmt_column_count_test.db'
+				};
+
+				return Q
+					.ninvoke(sqlite, 'open', scope.filename)
+					.then(function(db) {
+						scope.db = db;
+						return makeTable('text')(scope.db);
+					})
+					.then(makeExecuteStatement('insert into test_table_0 (id, col_1) values (100, \'hello\')'))
+					.then(function() {
+						return Q.ninvoke(scope.db, 'prepare', 'select id, col_1, 10, 20, 30, 40, 50, 60, 70, 80 from test_table_0');
+					})
+					.then(function(stmt) {
+						scope.stmt = stmt;
+						return Q.ninvoke(stmt, 'step');
+					})
+					.then(function() {
+						var datatypeCode = scope.stmt.columnCount();
+						assert.strictEqual(datatypeCode, 10);
+					})
+					.fin(makeCloseStatementAndDb(scope))
+					.fin(makeCleanup(scope))
+					.fail(makeReportError(scope));
+			});
 
 			it('type', function() {
 				var scope = {
