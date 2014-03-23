@@ -24,6 +24,21 @@ describe('high level', function() {
 				.fin(makeCleanup(scope))
 				.fail(makeReportError(scope));
 		});
+		
+		it('execute', function() {
+			var scope = {
+				filename: './hl_execute_test.db'
+			};
+
+			return Q
+				.ninvoke(sqlite, 'open', scope.filename)
+				.then(function(db) {
+					scope.db = db;
+					return Q.ninvoke(db, 'execute', 'create table my_test_table(id integer primary key not null)');
+				})
+				.fin(makeCleanup(scope))
+				.fail(makeReportError(scope));
+		});
 	});
 });
 

@@ -50,7 +50,7 @@ describe('low level', function() {
 				.fin(makeCleanup(scope))
 				.fail(makeReportError(scope));
 		});
-		
+
 		it('last insert row id', function() {
 			var scope = {
 				filename: './db_last_insert_rowid_test.db'
@@ -78,7 +78,7 @@ describe('low level', function() {
 				.fin(makeCleanup(scope))
 				.fail(makeReportError(scope));
 		});
-		
+
 		it('changes', function() {
 			var scope = {
 				filename: './db_changes_test.db'
@@ -213,6 +213,52 @@ describe('low level', function() {
 			it('double', makeBindTest(-140.25));
 			it('text', makeBindTest('let it be'));
 			it('null', makeBindTest(null));
+
+			it('all', function() {
+				var scope = {
+					filename: './stmt_clear_bind_all_test.db'
+				};
+
+				return Q
+					.ninvoke(sqlite, 'open', scope.filename)
+					.then(function(db) {
+						scope.db = db;
+						return makeTable('integer')(scope.db);
+					})
+					.then(function() {
+						return Q.ninvoke(scope.db, 'prepare', 'insert into test_table_0 (id, col_1) values (?, ?)');
+					})
+					.then(function(stmt) {
+						scope.insertStmt = stmt;
+						scope.insertStmt.bindAll([100, 1414]);
+						return Q.ninvoke(scope.insertStmt, 'step');
+					})
+					.then(function(code) {
+						assert.strictEqual(code, sqlite.errorCodes.SQLITE_DONE);
+						scope.insertStmt.finalize();
+						delete scope.insertStmt;
+						return Q.ninvoke(scope.db, 'prepare', 'select id, col_1 from test_table_0');
+					})
+					.then(function(stmt) {
+						scope.selectStmt = stmt;
+						return Q.ninvoke(scope.selectStmt, 'step');
+					})
+					.then(function(code) {
+						assert.strictEqual(code, sqlite.errorCodes.SQLITE_ROW);
+						assert.strictEqual(scope.selectStmt.columnInteger(0), 100);
+						assert.strictEqual(scope.selectStmt.columnType(1), sqlite.datatypeCodes.SQLITE_INTEGER);
+						assert.strictEqual(scope.selectStmt.columnInteger(1), 1414);
+					})
+					.fin(function() {
+						if (scope.selectStmt) {
+							scope.selectStmt.finalize();
+							delete scope.selectStmt;
+						}
+					})
+					.fin(makeCloseStatementAndDb(scope))
+					.fin(makeCleanup(scope))
+					.fail(makeReportError(scope));
+			});
 
 			it('clear', function() {
 				var scope = {
