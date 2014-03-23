@@ -15,7 +15,7 @@ using namespace v8;
 static Handle<Value> ErrMsg(const Arguments& args) {
 	HandleScope scope;
 	if (args.Length() < 1) {
-		ThrowException(Exception::TypeError(String::New("Expected at least one arguments.")));
+		ThrowException(Exception::TypeError(String::New("Expected at least one argument.")));
 	    return scope.Close(Undefined());
 	}
 	
@@ -31,7 +31,7 @@ static Handle<Value> ErrMsg(const Arguments& args) {
 static Handle<Value> GetAutocommit(const Arguments& args) {
 	HandleScope scope;
 	if (args.Length() < 1) {
-		ThrowException(Exception::TypeError(String::New("Expected at least one arguments.")));
+		ThrowException(Exception::TypeError(String::New("Expected at least one argument.")));
 	    return scope.Close(Undefined());
 	}
 	
@@ -47,7 +47,7 @@ static Handle<Value> GetAutocommit(const Arguments& args) {
 static Handle<Value> Changes(const Arguments& args) {
 	HandleScope scope;
 	if (args.Length() < 1) {
-		ThrowException(Exception::TypeError(String::New("Expected at least one arguments.")));
+		ThrowException(Exception::TypeError(String::New("Expected at least one argument.")));
 	    return scope.Close(Undefined());
 	}
 	
@@ -63,7 +63,7 @@ static Handle<Value> Changes(const Arguments& args) {
 static Handle<Value> LastInsertRowId(const Arguments& args) {
 	HandleScope scope;
 	if (args.Length() < 1) {
-		ThrowException(Exception::TypeError(String::New("Expected at least one arguments.")));
+		ThrowException(Exception::TypeError(String::New("Expected at least one argument.")));
 	    return scope.Close(Undefined());
 	}
 	
@@ -300,7 +300,7 @@ static Handle<Value> Version(const Arguments& args) {
 static Handle<Value> Finalize(const Arguments& args) {
 	HandleScope scope;
 	if (args.Length() < 1) {
-		ThrowException(Exception::TypeError(String::New("Expected at least one arguments.")));
+		ThrowException(Exception::TypeError(String::New("Expected at least one argument.")));
 	    return scope.Close(Undefined());
 	}
 	
