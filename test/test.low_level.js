@@ -515,7 +515,7 @@ describe('low level', function() {
 					.fin(makeCleanup(scope))
 					.fail(makeReportError(scope));
 			});
-			
+
 			describe('auto', function() {
 				it('int32', function() {
 					var scope = {
@@ -628,7 +628,7 @@ describe('low level', function() {
 						.fin(makeCleanup(scope))
 						.fail(makeReportError(scope));
 				});
-			
+
 				it('null', function() {
 					var scope = {
 						filename: './stmt_column_auto_null_test.db'

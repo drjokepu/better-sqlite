@@ -24,7 +24,7 @@ describe('high level', function() {
 				.fin(makeCleanup(scope))
 				.fail(makeReportError(scope));
 		});
-		
+
 		it('execute', function() {
 			var scope = {
 				filename: './hl_execute_test.db'
