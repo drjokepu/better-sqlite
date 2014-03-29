@@ -515,6 +515,148 @@ describe('low level', function() {
 					.fin(makeCleanup(scope))
 					.fail(makeReportError(scope));
 			});
+			
+			describe('auto', function() {
+				it('int32', function() {
+					var scope = {
+						filename: './stmt_column_auto_int32_test.db'
+					};
+
+					return Q
+						.ninvoke(sqlite, 'open', scope.filename)
+						.then(function(db) {
+							scope.db = db;
+							return makeTable('integer')(scope.db);
+						})
+						.then(makeExecuteStatement('insert into test_table_0 (id, col_1) values (100, 96000)'))
+						.then(function() {
+							return Q.ninvoke(scope.db, 'prepare', 'select col_1 from test_table_0');
+						})
+						.then(function(stmt) {
+							scope.stmt = stmt;
+							return Q.ninvoke(stmt, 'step');
+						})
+						.then(function() {
+							var value = scope.stmt.column(0);
+							assert.strictEqual(value, 96000);
+						})
+						.fin(makeCloseStatementAndDb(scope))
+						.fin(makeCleanup(scope))
+						.fail(makeReportError(scope));
+				});
+
+				it('int64', function() {
+					var scope = {
+						filename: './stmt_column_auto_int64_test.db'
+					};
+
+					return Q
+						.ninvoke(sqlite, 'open', scope.filename)
+						.then(function(db) {
+							scope.db = db;
+							return makeTable('integer')(scope.db);
+						})
+						.then(makeExecuteStatement('insert into test_table_0 (id, col_1) values (100, 17188322307)'))
+						.then(function() {
+							return Q.ninvoke(scope.db, 'prepare', 'select col_1 from test_table_0');
+						})
+						.then(function(stmt) {
+							scope.stmt = stmt;
+							return Q.ninvoke(stmt, 'step');
+						})
+						.then(function() {
+							var value = scope.stmt.column(0);
+							assert.strictEqual(value, 17188322307);
+						})
+						.fin(makeCloseStatementAndDb(scope))
+						.fin(makeCleanup(scope))
+						.fail(makeReportError(scope));
+				});
+
+				it('float', function() {
+					var scope = {
+						filename: './stmt_column_auto_float_test.db'
+					};
+
+					return Q
+						.ninvoke(sqlite, 'open', scope.filename)
+						.then(function(db) {
+							scope.db = db;
+							return makeTable('real')(scope.db);
+						})
+						.then(makeExecuteStatement('insert into test_table_0 (id, col_1) values (100, 340.5)'))
+						.then(function() {
+							return Q.ninvoke(scope.db, 'prepare', 'select col_1 from test_table_0');
+						})
+						.then(function(stmt) {
+							scope.stmt = stmt;
+							return Q.ninvoke(stmt, 'step');
+						})
+						.then(function() {
+							var value = scope.stmt.column(0);
+							assert.strictEqual(value, 340.5);
+						})
+						.fin(makeCloseStatementAndDb(scope))
+						.fin(makeCleanup(scope))
+						.fail(makeReportError(scope));
+				});
+
+				it('text', function() {
+					var scope = {
+						filename: './stmt_column_auto_text_test.db'
+					};
+
+					return Q
+						.ninvoke(sqlite, 'open', scope.filename)
+						.then(function(db) {
+							scope.db = db;
+							return makeTable('real')(scope.db);
+						})
+						.then(makeExecuteStatement('insert into test_table_0 (id, col_1) values (100, \'Hello, World!\')'))
+						.then(function() {
+							return Q.ninvoke(scope.db, 'prepare', 'select col_1 from test_table_0');
+						})
+						.then(function(stmt) {
+							scope.stmt = stmt;
+							return Q.ninvoke(stmt, 'step');
+						})
+						.then(function() {
+							var value = scope.stmt.column(0);
+							assert.strictEqual(value, 'Hello, World!');
+						})
+						.fin(makeCloseStatementAndDb(scope))
+						.fin(makeCleanup(scope))
+						.fail(makeReportError(scope));
+				});
+			
+				it('null', function() {
+					var scope = {
+						filename: './stmt_column_auto_null_test.db'
+					};
+
+					return Q
+						.ninvoke(sqlite, 'open', scope.filename)
+						.then(function(db) {
+							scope.db = db;
+							return makeTable('integer')(scope.db);
+						})
+						.then(makeExecuteStatement('insert into test_table_0 (id, col_1) values (100, null)'))
+						.then(function() {
+							return Q.ninvoke(scope.db, 'prepare', 'select col_1 from test_table_0');
+						})
+						.then(function(stmt) {
+							scope.stmt = stmt;
+							return Q.ninvoke(stmt, 'step');
+						})
+						.then(function() {
+							var value = scope.stmt.column(0);
+							assert.strictEqual(value, null);
+						})
+						.fin(makeCloseStatementAndDb(scope))
+						.fin(makeCleanup(scope))
+						.fail(makeReportError(scope));
+				});
+			});
 		});
 
 		it('sql', function() {
