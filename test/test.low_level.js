@@ -131,7 +131,7 @@ describe('low level', function() {
 
 		it('version', function() {
 			var version = sqlite.version();
-			assert.strictEqual(version, '3.8.4.1');
+			assert.strictEqual(version, '3.8.4.2');
 		});
 	});
 
