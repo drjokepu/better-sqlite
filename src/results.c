@@ -48,3 +48,49 @@ void row_free(row_t *row) {
 	row_free_members(row);
 	free(row);
 }
+
+result_t *result_new(size_t length, row_t *restrict rows) {
+	result_t *result = malloc(sizeof(result_t));
+	result->length = length;
+	
+	const size_t row_array_size = length * sizeof(row_t);
+	result->rows = malloc(row_array_size);
+	memcpy(result->rows, rows, row_array_size);
+	
+	return result;
+}
+
+static void result_free_members(result_t *result) {
+	for (size_t i = 0; i < result->length; i++) {
+		row_free_members(result->rows + i);
+	}
+	free(result->rows);
+}
+
+void result_free(result_t *result) {
+	result_free_members(result);
+	free(result);
+}
+
+result_set_t *result_set_new(size_t length, result_t *restrict results) {
+	result_set_t *result_set = malloc(sizeof(result_set_t));
+	result_set->length = length;
+	
+	const size_t result_array_size = length * sizeof(result_t);
+	result_set->results = malloc(result_array_size);
+	memcpy(result_set->results, results, result_array_size);
+	
+	return result_set;
+}
+
+static void result_set_free_members(result_set_t *result_set) {
+	for (size_t i = 0; i < result_set->length; i++) {
+		result_free_members(result_set->results + i);
+	}
+	free(result_set->results);
+}
+
+void result_set_free(result_set_t *result_set) {
+	result_set_free_members(result_set);
+	free(result_set);
+}

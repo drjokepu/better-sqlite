@@ -49,10 +49,16 @@ typedef struct result_t {
 	row_t *rows;
 } result_t;
 
+result_t *result_new(size_t length, row_t *restrict rows);
+void result_free(result_t *result);
+
 typedef struct result_set_t {
 	size_t length;
-	row_t *rows;
+	result_t *results;
 } result_set_t;
+
+result_set_t *result_set_new(size_t length, result_t *restrict results);
+void result_set_free(result_set_t *result_set);
 
 #ifdef __cplusplus
 }
