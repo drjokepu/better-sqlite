@@ -2,6 +2,7 @@
 #define __BS_BINDINGS_H__
 
 #include <uv.h>
+#include "async.h"
 #include "db.h"
 #include "statement.h"
 #include "sqlite3/sqlite3.h"
@@ -10,40 +11,6 @@
 extern "C"
 {
 #endif
-	
-#define SQLITE_BINDING(name) \
-name##_baton_t *name##_baton_new(void) { \
-	return calloc(1, sizeof(name##_baton_t)); \
-} \
-\
-void name##_baton_free(name##_baton_t *baton) { \
-	name##_baton_free_members(baton); \
-	uv_close((uv_handle_t*)&baton->async, NULL); \
-	free(baton); \
-} \
-\
-static void name##_async_begin(void *arg) { \
-	name##_baton_t *baton = (name##_baton_t*)arg; \
-	name##_baton_do(baton); \
-	uv_async_send(&baton->async); \
-} \
-\
-static void name##_async_end(uv_async_t *handle, int status) { \
-	name##_baton_t* baton = (name##_baton_t*)handle->data; \
-	baton->c_callback(baton); \
-} \
-\
-void name##_async(name##_baton_t *baton) { \
-	uv_thread_t thread_id; \
-	uv_async_init(uv_default_loop(), &baton->async, name##_async_end); \
-	baton->async.data = baton; \
-	uv_thread_create(&thread_id, name##_async_begin, baton); \
-}
-
-#define SQLITE_BINDING_HEADER(name) \
-name##_baton_t *name##_baton_new(void); \
-void name##_baton_free(name##_baton_t *baton); \
-void name##_async(name##_baton_t *baton);
 
 int clear_bindings_sync(statement_t *stmt);
 int bind_int_sync(statement_t *stmt, int index, int value);
@@ -77,7 +44,7 @@ typedef struct open_baton_t {
 	int result;
 } open_baton_t;
 
-SQLITE_BINDING_HEADER(open)
+ASYNC_HEADER(open)
 
 typedef struct close_baton_t {
 	uv_work_t req;
@@ -88,7 +55,7 @@ typedef struct close_baton_t {
 	int result;
 } close_baton_t;
 
-SQLITE_BINDING_HEADER(close)
+ASYNC_HEADER(close)
 	
 typedef struct prepare_baton_t {
 	uv_work_t req;
@@ -102,7 +69,7 @@ typedef struct prepare_baton_t {
 	int result;
 } prepare_baton_t;
 
-SQLITE_BINDING_HEADER(prepare)
+ASYNC_HEADER(prepare)
 
 typedef struct step_baton_t {
 	uv_work_t req;
@@ -113,7 +80,7 @@ typedef struct step_baton_t {
 	int result;
 } step_baton_t;
 
-SQLITE_BINDING_HEADER(step)
+ASYNC_HEADER(step)
 
 #ifdef __cplusplus
 }

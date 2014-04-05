@@ -1,12 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "results.h"
-
-record_t *record_new(void) {
-	record_t *record = calloc(1, sizeof(record_t));
-	record->type = record_type_null;
-	return record;
-}
+#include "sqlite3/sqlite3.h"
 
 static void record_free_members(record_t *record) {
 	switch (record->type) {
@@ -21,32 +16,11 @@ static void record_free_members(record_t *record) {
 	}
 }
 
-void record_free(record_t *record) {
-	record_free_members(record);
-	free(record);
-}
-
-row_t *row_new(size_t length, record_t *restrict records) {
-	row_t *row = malloc(sizeof(row_t));
-	row->length = length;
-	
-	const size_t record_array_size = length * sizeof(record_t);
-	row->records = malloc(record_array_size);
-	memcpy(row->records, records, record_array_size);
-	
-	return row;
-}
-
 static void row_free_members(row_t *row) {
 	for (size_t i = 0; i < row->length; i++) {
 		record_free_members(row->records + i);
 	}
 	free(row->records);
-}
-
-void row_free(row_t *row) {
-	row_free_members(row);
-	free(row);
 }
 
 result_t *result_new(size_t length, row_t *restrict rows) {
@@ -72,25 +46,58 @@ void result_free(result_t *result) {
 	free(result);
 }
 
-result_set_t *result_set_new(size_t length, result_t *restrict results) {
-	result_set_t *result_set = malloc(sizeof(result_set_t));
-	result_set->length = length;
-	
-	const size_t result_array_size = length * sizeof(result_t);
-	result_set->results = malloc(result_array_size);
-	memcpy(result_set->results, results, result_array_size);
-	
-	return result_set;
-}
+//
+// query
+// -----
 
-static void result_set_free_members(result_set_t *result_set) {
-	for (size_t i = 0; i < result_set->length; i++) {
-		result_free_members(result_set->results + i);
+static void query_read_record(sqlite3_stmt *stmt, int column_index, record_t *restrict record) {
+	switch(sqlite3_column_type(stmt, column_index)) {
+		case SQLITE_INTEGER:
+			record->type = record_type_integer;
+			record->value.integer_value = sqlite3_column_int64(stmt, column_index);
+			break;
+		case SQLITE_NULL:
+		default: // return null for unsupported types
+			record->type = record_type_null;
+			break;
 	}
-	free(result_set->results);
 }
 
-void result_set_free(result_set_t *result_set) {
-	result_set_free_members(result_set);
-	free(result_set);
+static void query_read_row(sqlite3_stmt *stmt, row_t *restrict row) {
+	const int record_count = sqlite3_column_count(stmt);
+	record_t *records = malloc(record_count * sizeof(record_t));
+	for (int i = 0; i < record_count; i++) {
+		query_read_record(stmt, i, records + i);
+	}
+	
+	row->length = record_count;
+	row->records = records;
 }
+
+static result_t *query_get_result(sqlite3_stmt *stmt) {
+	int step_result;
+	unsigned int row_count = 0;
+	unsigned int row_capacity = 64;
+	row_t *rows = malloc(row_capacity * sizeof(row_t));
+	
+	while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW) {
+		if (row_count == row_capacity) {
+			row_capacity *= 2;
+			rows = realloc(rows, row_capacity);
+		}
+		query_read_row(stmt, rows + (row_count++));
+	}
+	
+	result_t *result = result_new(row_count, rows);
+	free(rows);
+	return result; 
+}
+
+static void query_baton_do(query_baton_t *restrict baton) {
+	baton->result = query_get_result(baton->statement->sqlite_statement);
+}
+
+static void query_baton_free_members(query_baton_t *restrict baton) {
+}
+
+ASYNC(query);

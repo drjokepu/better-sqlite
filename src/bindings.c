@@ -90,7 +90,7 @@ static void open_baton_free_members(open_baton_t *restrict baton) {
 	}
 }
 
-SQLITE_BINDING(open);
+ASYNC(open);
 
 //
 // close
@@ -103,7 +103,7 @@ static void close_baton_do(close_baton_t *restrict baton) {
 static void close_baton_free_members(close_baton_t *restrict baton) {
 }
 
-SQLITE_BINDING(close);
+ASYNC(close);
 
 //
 // prepare
@@ -125,7 +125,7 @@ static void prepare_baton_free_members(prepare_baton_t *restrict baton) {
 	}
 }
 
-SQLITE_BINDING(prepare);
+ASYNC(prepare);
 
 //
 // step
@@ -138,5 +138,5 @@ static void step_baton_do(step_baton_t *restrict baton) {
 static void step_baton_free_members(step_baton_t *restrict baton) {
 }
 
-SQLITE_BINDING(step);
+ASYNC(step);
 
