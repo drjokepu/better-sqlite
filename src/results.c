@@ -50,11 +50,33 @@ void result_free(result_t *result) {
 // query
 // -----
 
+static char* copy_string(const char* restrict src, size_t *restrict out_length) {
+	const size_t str_length = strlen(src);
+	const size_t mem_length = str_length + 1;
+	char *dst = malloc(mem_length);
+	memcpy(dst, src, mem_length);
+	
+	if (out_length != NULL) {
+		*out_length = str_length;
+	}
+	
+	return dst;
+}
+
 static void query_read_record(sqlite3_stmt *stmt, int column_index, record_t *restrict record) {
 	switch(sqlite3_column_type(stmt, column_index)) {
 		case SQLITE_INTEGER:
 			record->type = record_type_integer;
 			record->value.integer_value = sqlite3_column_int64(stmt, column_index);
+			break;
+		case SQLITE_FLOAT:
+			record->type = record_type_float;
+			record->value.float_value = sqlite3_column_double(stmt, column_index);
+			break;
+		case SQLITE_TEXT:
+			record->type = record_type_text;
+			record->value.text_value.text = copy_string((const char*)sqlite3_column_text(stmt, column_index),
+				&record->value.text_value.length);
 			break;
 		case SQLITE_NULL:
 		default: // return null for unsupported types
